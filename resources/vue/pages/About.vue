@@ -13,6 +13,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import notifications from '../../js/notifications';
+import Swal from 'sweetalert2';
 import AdminTable from '../components/AdminTable.vue';
 
 const leaveData = ref([]);
@@ -29,19 +31,6 @@ const headers = ref([
     { title: 'Actions', value: 'actions' }
 ]);
 
-//onmounted
-onMounted(async () => {
-    // try {
-    //     const res = await axios.get('/leave_data');
-    //     leaveData.value = res.data;
-    //     console.log(res.data);
-    // } catch (err) {
-    //     console.error('Error fetching leave data:', err);
-    // }
-    await fetchLeaveData();
-});
-
-//functions
 const fetchLeaveData = async () => {
     try {
         const res = await axios.get('/leave_data');
@@ -53,24 +42,33 @@ const fetchLeaveData = async () => {
 };
 
 const approve = async (id, status) => {
-    console.log(id, 'approve', status)
-    // try {
-    //     await axios.post(`/update_leave${id}`);
-    //     await fetchLeaveData();
-    // } catch (err) {
-    //     console.error('Error approving leave:', err);
-    // }
-    axios({
-        url: '/update_leave',
-        method: 'post',
-        data: {
-            leave_detail_id : id,
-            status : status,
-        }
-    }).then((res) => {
-        console.log(res)
-        fetchLeaveData()
-    })
+    const result = await Swal.fire({
+        text: "Are you sure you want to approve this leave request?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        confirmButtonColor: "#32cd32",
+        cancelButtonColor: '#ff3131'
+    });
+
+    if(result.isConfirmed){
+        console.log(id, 'approve', status)
+        axios({
+            url: '/update_leave',
+            method: 'post',
+            data: {
+                leave_detail_id : id,
+                status : status,
+            }
+        }).then((res) => {
+            console.log(res)
+            fetchLeaveData()
+            notifications.notifySuccess('The leave request has been approved')
+        }).catch((error) =>  {
+            console.error(error)
+            notifications.notifyError('There was an error approving the leave request')
+        })
+    }
 
 };
 
@@ -105,5 +103,17 @@ const cancel = async (id, status) => {
     })
 };
 
+
+//onmounted
+onMounted(async () => {
+    // try {
+    //     const res = await axios.get('/leave_data');
+    //     leaveData.value = res.data;
+    //     console.log(res.data);
+    // } catch (err) {
+    //     console.error('Error fetching leave data:', err);
+    // }
+    await fetchLeaveData();
+});
 
 </script>
