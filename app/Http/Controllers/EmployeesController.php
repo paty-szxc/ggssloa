@@ -24,6 +24,4 @@ class EmployeesController extends Controller
 
         return response()->json($employee);
     }
-
-    
 }

@@ -6,13 +6,24 @@
                 <v-toolbar-title >Leave of Absence Form</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <p>Hi, {{ credential.username }}</p>
+                <v-switch
+                    class="ml-3"
+                    hide-details
+                    v-model="isDarkTheme"
+                    @click="toggleTheme">
+                    <template v-slot:thumb>
+                        <v-icon v-if="isDarkTheme">mdi-weather-night</v-icon>
+                        <v-icon v-else>mdi-white-balance-sunny</v-icon>
+                    </template>
+                </v-switch>
                 <v-btn @click="logout()">Logout</v-btn>
             </v-app-bar>
     
             <v-navigation-drawer v-model="navDrawer">
                 <v-list nav>
                     <v-list-item 
-                        v-for="(item, index) in drawerItems" :key="index"
+                        v-for="item in drawerItems" 
+                        :key="item.id"
                         :to="item.path"
                     >
                         {{ item.title }}
@@ -37,28 +48,46 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router"
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
+const isDarkTheme = ref(localStorage.getItem('theme') === 'dark');
+theme.global.name.value = isDarkTheme.value ? 'dark' : 'light';
+
+function toggleTheme() {
+    const newTheme = isDarkTheme.value ? 'light' : 'dark';
+    theme.global.name.value = newTheme;
+    isDarkTheme.value = !isDarkTheme.value;
+    localStorage.setItem('theme', newTheme);
+}
 
 const navDrawer = ref(false);
 const drawers = ref([
-    {title: 'Home', path: '/'},
-    {title: 'Pending Leave Requests', path: '/pending_leave_req'},
-    {title: 'Leave Status Dashboard', path: '/leave_status_dashboard'}
+    { id: 1, title: 'Home', path: '/' },
+    { id: 2, title: 'Pending Leave Requests', path: '/pending_leave_req' },
+    { id: 3, title: 'Leave Status Dashboard', path: '/leave_status_dashboard' },
+    { id: 4, title: 'Overtime Request', path: '/ot_request' },
+    { id: 5, title: 'Pending Overtime Request', path: '/ot_approval' }
 ]);
+
 
 const route = useRoute();
 const isLoginRoute = computed(() => route.path === '/login');
 
-const drawerItems = computed (() => {
-    let items = []
+const drawerItems = computed(() => {
+    let items = [];
     drawers.value.forEach(el => {
-        if(credential.value.id == 3){
-            items.push(el)
-        }else if(el.title == 'Home'){
-            items.push(el)
+        if (credential.value.id == 2) {
+            items.push(el);
+        } else {
+            if (el.title === 'Home' || el.title === 'Overtime Request') {
+                items.push(el);
+            }
         }
     });
-    return items
+    return items;
 });
+
 
 const credential = ref({ username: '', first_name: '', last_name: '' });
 

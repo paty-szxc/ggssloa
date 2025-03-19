@@ -7,15 +7,17 @@
             :disapprove="disapprove"
             :cancel="cancel">
         </AdminTable>
+
+        <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import notifications from '../../js/notifications';
 import Swal from 'sweetalert2';
 import AdminTable from '../components/AdminTable.vue';
+import Snackbar from '../components/Snackbar.vue';
 
 const leaveData = ref([]);
 const headers = ref([
@@ -30,6 +32,8 @@ const headers = ref([
     { title: 'Reasons', value: 'reasons' },
     { title: 'Actions', value: 'actions' }
 ]);
+
+const snackbar = ref(null);
 
 const fetchLeaveData = async () => {
     try {
@@ -54,7 +58,7 @@ const approve = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'approve', status)
         axios({
-            url: '/update_leave',
+            url: '/handle_leave_request',
             method: 'post',
             data: {
                 leave_detail_id : id,
@@ -63,56 +67,75 @@ const approve = async (id, status) => {
         }).then((res) => {
             console.log(res)
             fetchLeaveData()
-            notifications.notifySuccess('The leave request has been approved')
+            snackbar.value.alertApproved()
         }).catch((error) =>  {
             console.error(error)
-            notifications.notifyError('There was an error approving the leave request')
         })
     }
-
 };
 
 
 const disapprove = async (id, status) => {
-    console.log(id, 'disapprove', status)
-    axios({
-        url: '/update_leave',
-        method: 'post',
-        data: {
-            leave_detail_id : id,
-            status : status,
-        }
-    }).then((res) => {
-        console.log(res)
-        fetchLeaveData()
-    })
+    const result = await Swal.fire({
+        text: "Are you sure you want to disapprove this leave request?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        confirmButtonColor: "#32cd32",
+        cancelButtonColor: '#ff3131'
+    });
+
+    if(result.isConfirmed){
+        console.log(id, 'disapprove', status)
+        axios({
+            url: '/handle_leave_request',
+            method: 'post',
+            data: {
+                leave_detail_id : id,
+                status : status,
+            }
+        }).then((res) => {
+            console.log(res)
+            fetchLeaveData()
+            snackbar.value.alertDisapproved()
+        }).catch((error) =>  {
+            console.error(error)
+        })
+    }
 };
 
 const cancel = async (id, status) => {
-    console.log(id, 'cancel', status)
-    axios({
-        url: '/update_leave',
-        method: 'post',
-        data: {
-            leave_detail_id : id,
-            status : status,
-        }
-    }).then((res) => {
-        console.log(res)
-        fetchLeaveData()
-    })
+    const result = await Swal.fire({
+        text: "Are you sure you want to cancel this leave request?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        confirmButtonColor: "#32cd32",
+        cancelButtonColor: '#ff3131'
+    });
+
+    if(result.isConfirmed){
+        console.log(id, 'cancel', status)
+        axios({
+            url: '/handle_leave_request',
+            method: 'post',
+            data: {
+                leave_detail_id : id,
+                status : status,
+            }
+        }).then((res) => {
+            console.log(res)
+            fetchLeaveData()
+            snackbar.value.alertCancelled()
+        }).catch((error) =>  {
+            console.error(error)
+        })
+    }
 };
 
 
 //onmounted
 onMounted(async () => {
-    // try {
-    //     const res = await axios.get('/leave_data');
-    //     leaveData.value = res.data;
-    //     console.log(res.data);
-    // } catch (err) {
-    //     console.error('Error fetching leave data:', err);
-    // }
     await fetchLeaveData();
 });
 

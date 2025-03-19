@@ -11,12 +11,22 @@ const router = createRouter({
         { 
             path: '/pending_leave_req', 
             name: 'Pending Leave Request', 
-            component: () => import('../vue/pages/About.vue') 
+            component: () => import('../vue/pages/PendingLeaveReq.vue') 
         },
         { 
             path: '/leave_status_dashboard', 
             name: 'Leave Status Dashboard', 
             component: () => import('../vue/pages/Dashboard.vue') 
+        },
+        { 
+            path: '/ot_request', 
+            name: 'Overtime Request', 
+            component: () => import('../vue/pages/OTRequest.vue') 
+        },
+        { 
+            path: '/ot_approval', 
+            name: 'Pending Overtime Request', 
+            component: () => import('../vue/pages/OTApproval.vue') 
         },
         { 
             path: '/login', 

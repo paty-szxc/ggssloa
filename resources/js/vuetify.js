@@ -16,7 +16,17 @@ const vuetify = createVuetify({
             variant: 'outlined',
             density: 'compact',
         }
-    }
+    },
+    theme: {
+        themes: {
+            light: {
+            // Define your light theme colors here
+            },
+            dark: {
+                // Define your dark theme colors here
+            },
+            },
+        },
 })
 
 export default vuetify;

@@ -41,10 +41,10 @@ class LeaveDetailsController extends Controller
         return response()->json($leave_dets);
     }
 
-    public function getLeaveDetailsHome(){
-        $userId = Auth::id();
-        $dets = LeaveDetail::select(
+    public function getLeaveReq(){
+        $leave_req = LeaveDetail::select(
             'users.name',
+            'users.username',
             'leave_details.id',
             'leave_details.user_id',
             'leave_details.date_filed',
@@ -55,19 +55,14 @@ class LeaveDetailsController extends Controller
             'leave_details.filed',
             'leave_details.with_pay',
             'leave_details.reasons',
+            'leave_details.status',
             'leave_types.leave_name',
-
-        )->leftJoin('users', 'users.id', 'user_id')
-        ->leftJoin('leave_types', 'leave_types.id', 'leave_type')
-        ->where('user_id', $userId)
-        ->where('status', '!=', 0)
-        ->get();
-
-        if(count($dets) == 0) {
-            return response()->json(['message' => 'Employee leave details not found'], 404);
-        }
-
-        return response()->json($dets);
+            )
+            ->leftJoin('users', 'users.id', 'user_id')
+            ->leftJoin('leave_types', 'leave_types.id', 'leave_type')
+            ->where('status', '!=', 0)
+            ->get();
+        return $leave_req;
     }
 
     public function convertToYyyyMmDd($isoDate) {
@@ -102,12 +97,49 @@ class LeaveDetailsController extends Controller
         // }
     }
 
-    public function updateLeave(Request $request){
-        // return $request;
-        // $userId = Auth::id();
+    // public function handleLeaveRequest(Request $req){
+    //     // return $req;
+    //     // $userId = Auth::id();
 
-        $upd = LeaveDetail::find($request->leave_detail_id);
-        $upd->status = $request->status;
-        $upd->save();
+    //     $upd = LeaveDetail::find($req->leave_detail_id);
+    //     $upd->status = $req->status;
+    //     $upd->save();
+    // }
+    public function handleLeaveRequest(Request $req){
+        // return $req;
+        $user = Auth::user();
+        if($user){
+            $upd = LeaveDetail::find($req->leave_detail_id);
+            $upd->status = $req->status;
+            $upd->updated_by = $user->username;
+            $upd->save();
+    
+            return response()->json([
+                'message' => 'Leave request updated successfully.',
+                'updated_by' => $user->username,
+            ]);
+        }
+    
+        // If the user is not authenticated, return an error response
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    public function update_leave_home(Request $request){
+        // return $request;
+        $userId = Auth::id();
+
+        $leave = LeaveDetail::find($request->to_insert['id']);
+
+        $leave->update([
+            'user_id' => $userId,
+            'date_filed' => (new \DateTime())->format('Y-m-d'),
+            'leave_type' => $request->to_insert['leave_type'],
+            'leave_from' => $this->convertToYyyyMmDd($request->to_insert['leave_from']),
+            'leave_to' => $this->convertToYyyyMmDd($request->to_insert['leave_to']),
+            'no_of_days' => $request->to_insert['no_of_days'],
+            'reasons' => $request->to_insert['reasons'],
+            'filed' => isset($request->to_insert['filed']) ? $request->to_insert['filed'] : 0,
+            'with_pay' => isset($request->to_insert['with_pay']) ? $request->to_insert['with_pay'] : 0,
+        ]);
     }
 }

@@ -92,16 +92,17 @@
             <DataTable
                 :headers="headers"
                 :leaveData="empData?.leave_details"
-                @open-dialog="openAddDialog">
+                @open-dialog="openAddDialog"
+                @edit-data="openEditDialog">
             </DataTable>
         </v-card>
 
-        <v-dialog v-model="addDialog">
+        <v-dialog v-model="addDialog" persistent no-click-animation>
             <v-card>
                 <v-card-title 
                     style="background: linear-gradient(135deg, #0047AB, #50C878); 
                     color: white;">
-                    Add Leave
+                    {{ isEditMode ? 'Edit Leave' : 'Add Leave' }}
                 </v-card-title>
                 <v-card-text>
                     <v-autocomplete 
@@ -116,6 +117,7 @@
                     <v-date-input
                         density="compact"
                         label="Leave From:"
+                        :min="minDate"
                         prepend-icon=""
                         prepend-inner-icon="mdi-calendar"
                         variant="outlined"
@@ -124,6 +126,7 @@
                     <v-date-input
                         density="compact"
                         label="Leave To:"
+                        :min="minDate"
                         prepend-icon=""
                         prepend-inner-icon="mdi-calendar"
                         variant="outlined"
@@ -173,33 +176,36 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import DataTable from '../components/DataTable.vue';
+import Snackbar from '../components/Snackbar.vue';
 import { useDisplay } from 'vuetify';
 
-// const leaveType = ref(['Sick', 'Vacation', 'Parental Leave', 'Paternity Leave', 'Bereavement Leave'])
-// const value = ref('Vacation')
 const empData = ref({})
 const add = ref({})
-// const forApproval  = ref(true)
 const leaveData =  ref([])
 const leaveTypeData = ref([])
 const headers = ref([
-    { title: 'Date Filed', value: 'date_filed' },
-    { title: 'Leave From', value: 'leave_from' },
-    { title: 'Leave To', value: 'leave_to' },
-    { title: 'No. of Days', value: 'no_of_days' },
-    { title: 'Leave Type', value: 'leave_type' },
-    { title: 'Filed', value: 'filed' },
-    { title: 'W/Pay', value: 'with_pay' },
-    { title: 'Reasons', value: 'reasons' },
+    { title: 'Date Filed', value: 'date_filed', sortable: true },
+    { title: 'Leave From', value: 'leave_from', sortable: true },
+    { title: 'Leave To', value: 'leave_to', sortable: true },
+    { title: 'No. of Days', value: 'no_of_days', sortable: true },
+    { title: 'Leave Type', value: 'leave_type', sortable: true },
+    { title: 'Filed', value: 'filed', sortable: true },
+    { title: 'W/Pay', value: 'with_pay', sortable: true },
+    { title: 'Reasons', value: 'reasons', sortable: true },
     { title: 'Status', value: 'actions' }
 ]);
 
+const minDate = ref(new Date().toISOString().split('T')[0]);
+
+const snackbar = ref(null);
 
 const { name } = useDisplay();
 const cols = computed(() => {
@@ -214,14 +220,26 @@ const cols = computed(() => {
 })
 
 const legendItems = ref([
-    { label: 'For Approval', color: 'green' },
+    { label: 'For Approval', color: 'blue' },
+    { label: 'Approved', color: 'green' },
     { label: 'Disapproved/AWOL', color: 'red' },
     { label: 'Cancelled', color: 'orange' },
 ]);
 
 const addDialog = ref(false)
+const isEditMode = ref(false)
 
 const openAddDialog = () => {
+    isEditMode.value = false
+    addDialog.value = true
+}
+
+const openEditDialog = (item) => {
+    console.log(item, 'home')
+    add.value = item
+    add.value.leave_from = new Date(item.leave_from)
+    add.value.leave_to = new Date(item.leave_to)
+    isEditMode.value = true
     addDialog.value = true
 }
 
@@ -230,29 +248,52 @@ const closeAddDialog = () => {
     add.value = {}
 }
 
+//functions
 function submitForm(){
-    const  to_insert = add.value;
+    const to_insert = add.value;
     
     if(!add.value.leave_type){
         alert('Fill up empty fields!')
     }
     else{
-        console.log('insert')
-        axios({
-            url: '/add_leave',
-            method: 'post',
-            data: {
-                to_insert
-            }
-        }).then((res) => {
-            console.log(res)
-            loadData()
-            addDialog.value = false
-        })
-        // alert('Okay')
+        // console.log('insert')
+        if(!isEditMode.value){
+            // console.log('add')
+            axios({
+                url: '/add_leave',
+                method: 'post',
+                data: {
+                    to_insert
+                }
+            }).then((res) => {
+                console.log(res)
+                loadData()
+                snackbar.value.alertSuccess()
+                addDialog.value = false
+            }).catch(() => {
+                snackbar.value.alertError()
+            });
+        }else{
+            // console.log('edit')
+            console.log(add.value)
+            axios({
+                url: '/update_leave_home',
+                method: 'post',
+                data: {
+                    to_insert
+                }
+            }).then((res) => {
+                console.log(res)
+                loadData()
+                snackbar.value.alertUpdate()
+                addDialog.value = false
+            }).catch(() => {
+                snackbarMessage.value = 'There was an error updating your leave request. Please try again.';
+                snackbar.value = true
+            });
+        }
     }
 }
-
 
 function loadData(){
     axios({

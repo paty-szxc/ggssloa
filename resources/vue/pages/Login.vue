@@ -68,15 +68,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import axios from "axios"
-import notifications from "../../js/notifications"
 
 const tab = ref(null)
-
 const credential = ref({})
 
-function registerEmp() {
+//functions
+function registerEmp(){
     if(!credential.value.name || !credential.value.username || !credential.value.password){
         notifications.notifyWarning('Fill up empty fields')
     } 
@@ -95,7 +94,7 @@ function registerEmp() {
     }
 }
 
-function login() {
+function login(){
     if(!credential.value.username || !credential.value.password){
         notifications.notifyWarning('Fill up empty fields')
     }
@@ -112,6 +111,11 @@ function login() {
         })
     }
 }
+
+//onmounted
+onMounted(async () => {
+    loadData()
+});
 
 
 </script>

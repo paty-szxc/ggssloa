@@ -22,11 +22,6 @@ class LeaveDetail extends Model
         'filed',
         'with_pay',
         'reasons',
-        // 'sick_leave',
-        // 'vacation_leave',
-        // 'parental_leave',
-        // 'paternity_leave',
-        // 'bereavement_leave'
     ];
 
     

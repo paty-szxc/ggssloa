@@ -33,6 +33,7 @@
                 <v-icon v-else color="red">mdi-close-circle</v-icon>
             </template>
         </v-data-table>
+
     </v-container>
 </template>
 
@@ -46,4 +47,5 @@ const { headers, leaveData, approve, disapprove, cancel } = defineProps({
     disapprove: Function,
     cancel: Function
 });
+
 </script>

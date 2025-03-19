@@ -23,7 +23,8 @@ const headers = ref([
     { title: 'Filed', value: 'filed', sortable: true },
     { title: 'W/Pay', value: 'with_pay', sortable: true },
     { title: 'Reasons', value: 'reasons', sortable: true },
-    { title: 'Status', value: 'status', sortable: true }
+    { title: 'Status', value: 'status', sortable: true },
+    { title: 'Updated By', value: 'username', sortable: true },
 ]);
 
 const fetchLeaveReq = async () => {
