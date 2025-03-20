@@ -30,15 +30,7 @@
             </v-card-text>
         </v-card>
 
-        <v-snackbar
-            color="success"
-            location="top right"
-            :timeout="3500" 
-            variant="outlined"
-            v-model="snackbar"
-            >
-            {{ snackbarMessage }}
-        </v-snackbar>
+        <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>
 
@@ -46,9 +38,9 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Snackbar from '../components/Snackbar.vue';
 
-const snackbar = ref(false);
-const snackbarMessage = ref('');
+const snackbar = ref(null);
 const headers = ref([
     { title: 'Name', value: 'name'},
 	{ title: 'Reason', value: 'reason' },
@@ -81,7 +73,7 @@ const approve = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'approve', status)
         axios({
-            url: '/update_ot_req',
+            url: '/handle_ot_request',
             method: 'post',
             data: {
                 ot_req_id : id,
@@ -89,16 +81,74 @@ const approve = async (id, status) => {
             }
         }).then((res) => {
             console.log(res)
-            fetchLeaveData()
-            snackbarMessage.value = 'The leave request has been approved.';
-            snackbar.value = true;
+            fetchOTReq()
+            snackbar.value.alertApproved()
         }).catch((error) =>  {
             console.error(error)
-            snackbarMessage.value = 'There was an error approving the leave request.';
-            snackbar.value = true;
+            snackbar.value.alertCustom('There was an error approving the leave request.')
         })
     }
-};
+}
+
+const disapprove = async (id, status) => {
+    const result = await Swal.fire({
+        text: "Are you sure you want to disapprove this OT request?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        confirmButtonColor: "#32cd32",
+        cancelButtonColor: '#ff3131'
+    });
+
+    if(result.isConfirmed){
+        console.log(id, 'disapprove', status)
+        axios({
+            url: '/handle_ot_request',
+            method: 'post',
+            data: {
+                ot_req_id : id,
+                status : status,
+            }
+        }).then((res) => {
+            console.log(res)
+            fetchOTReq()
+            snackbar.value.alertDisapproved()
+        }).catch((error) =>  {
+            console.error(error)
+            snackbar.value.alertCustom('There was an error approving the leave request.')
+        })
+    }
+}
+
+const cancel = async (id, status) => {
+    const result = await Swal.fire({
+        text: "Are you sure you want to cancel this OT request?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        confirmButtonColor: "#32cd32",
+        cancelButtonColor: '#ff3131'
+    });
+
+    if(result.isConfirmed){
+        console.log(id, 'cancel', status)
+        axios({
+            url: '/handle_ot_request',
+            method: 'post',
+            data: {
+                ot_req_id : id,
+                status : status,
+            }
+        }).then((res) => {
+            console.log(res)
+            fetchOTReq()
+            snackbar.value.alerCancelled()
+        }).catch((error) =>  {
+            console.error(error)
+            snackbar.value.alertCustom('There was an error approving the leave request.')
+        })
+    }
+}
 
 onMounted(async () => {
     fetchOTReq()

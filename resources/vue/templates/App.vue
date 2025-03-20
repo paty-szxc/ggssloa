@@ -65,9 +65,9 @@ const navDrawer = ref(false);
 const drawers = ref([
     { id: 1, title: 'Home', path: '/' },
     { id: 2, title: 'Pending Leave Requests', path: '/pending_leave_req' },
-    { id: 3, title: 'Leave Status Dashboard', path: '/leave_status_dashboard' },
-    { id: 4, title: 'Overtime Request', path: '/ot_request' },
-    { id: 5, title: 'Pending Overtime Request', path: '/ot_approval' }
+    { id: 3, title: 'Overtime Request', path: '/ot_request' },
+    { id: 4, title: 'Pending Overtime Request', path: '/ot_approval' },
+    { id: 5, title: 'Status Dashboard', path: '/status_dashboard' },
 ]);
 
 
@@ -77,7 +77,7 @@ const isLoginRoute = computed(() => route.path === '/login');
 const drawerItems = computed(() => {
     let items = [];
     drawers.value.forEach(el => {
-        if (credential.value.id == 2) {
+        if (credential.value.id == 2 || credential.value.id == 12) {
             items.push(el);
         } else {
             if (el.title === 'Home' || el.title === 'Overtime Request') {

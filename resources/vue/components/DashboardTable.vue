@@ -2,7 +2,7 @@
     <v-container>
         <p class="text-h4">Leave Request Summary</p>
         <v-data-table
-            :headers="headers"
+            :headers="leaveHeaders"
             :items="leaveDataReq">
             <template v-slot:item.status="{ item }">
                 <span v-if="item.status === 0" style="color: green;">
@@ -27,14 +27,33 @@
                 <v-icon v-else color="red">mdi-close-circle</v-icon>
             </template>
         </v-data-table>
+
+        <p class="text-h4">OT Request Summary</p>
+        <v-data-table
+            :headers="otHeaders"
+            :items="otReqData">
+            <template v-slot:item.status="{ item }">
+                <span v-if="item.status === 1" style="color: green;">
+                    Approved
+                </span>
+                <span v-else-if="item.status === 2" style="color: red;">
+                    Disapproved
+                </span>
+                <span v-else-if="item.status === 3" style="color: orange;">
+                    Cancelled
+                </span>
+            </template>
+        </v-data-table>
     </v-container>
 </template>
 
 <script setup>
 import { defineProps } from 'vue';
 
-const { headers, leaveDataReq} = defineProps({
-    headers: Array,
-    leaveDataReq: Array
+const { leaveHeaders, leaveDataReq, otHeaders, otReqData } = defineProps({
+    leaveHeaders: Array,
+    leaveDataReq: Array,
+    otHeaders: Array,
+    otReqData: Array
 })
 </script>

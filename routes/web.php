@@ -39,10 +39,11 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/get_ot_request', [OTRequestController::class, 'getOTReq']);
     Route::get('/get_all_ot_request', [OTRequestController::class, 'getAllOtReq']);
-    Route::post('/submit_ot_request', [OTRequestController::class, 'submitOTReq']);
-    Route::post('/update_ot_req', [OTRequestController::class, 'updateOtReq']);
+    Route::post('/submit_ot_request', [OTRequestController::class, 'submitOtReq']);
+    Route::post('/handle_ot_request', [OTRequestController::class, 'handleOtReq']);
+    Route::get('/ot_request_details', [OTRequestController::class, 'getApprovedOtReq']);
     Route::post('/add_leave', [LeaveDetailsController::class, 'addLeave']);
     Route::post('/update_leave_home', [LeaveDetailsController::class, 'update_leave_home']);
-    Route::post('/handle_leave_request', [LeaveDetailsController::class, 'handleLeaveRequest']);
+    Route::post('/handle_leave_request', [LeaveDetailsController::class, 'handleLeaveReq']);
     Route::get('/{any}', [SpaController::class, 'index'])->where('any','.*');
 });

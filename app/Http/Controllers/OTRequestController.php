@@ -19,13 +19,14 @@ class OTRequestController extends Controller
             )
             ->where('user_id', $userId)
             ->get();
-
         return $ot;
     }
 
     public function getAllOtReq(){
         $all_ot = OTRequest::select(
             'users.name',
+            'users.username',
+            'ot_request.id',
             'ot_request.reason',
             'ot_request.time_duration',
             'ot_request.status'
@@ -33,40 +34,108 @@ class OTRequestController extends Controller
             ->leftJoin('users', 'users.id', 'user_id')
             ->where('status', 0)
             ->get();
-
         return $all_ot;
     }
 
-    public function submitOTReq(Request $request)
-    {
-        // Validate the incoming request data
+    public function getApprovedOtReq(){
+        $approved_ot = OTRequest::select(
+            'users.name',
+            'users.username',
+            'ot_request.id',
+            'ot_request.reason',
+            'ot_request.time_duration',
+            'ot_request.status',
+            'ot_request.approved_by'
+            )
+            ->leftJoin('users', 'users.id', 'user_id')
+            ->where('status', '!=', 0)
+            ->get();
+        return $approved_ot;
+    }
+
+    // public function submitOtReq(Request $request){
+    //     $request->validate([
+    //         'reason' => 'required|string|max:255',
+    //         'time_duration' => 'required|string|regex:/^(0|[1-9]\d*):[0-5]\d$/', //enforce HH:MM format
+
+    //     ]);
+    //     $otRequest = new OTRequest();
+    //     $otRequest->user_id = Auth::id();
+    //     $otRequest->reason = $request->reason;
+    //     $otRequest->time_duration = $request->time_duration;
+    //     $otRequest->status = 0;
+    //     $otRequest->save();
+    
+    //     return response()->json(['message' => 'OT request submitted successfully!'], 201);
+    // }
+
+    public function submitOtReq(Request $request) {
         $request->validate([
             'reason' => 'required|string|max:255',
-            'time_duration' => 'required|string|regex:/^.+$/', // Accept any non-empty string
-
+            'time_duration' => [
+                'required',
+                'string',
+                'regex:/^(0|[1-9]\d*):[0-5]\d$/', // Ensure HH:MM format
+                function ($attribute, $value, $fail) {
+                    list($hours, $minutes) = explode(':', $value);
+                    $totalMinutes = ($hours * 60) + $minutes;
+                    if ($totalMinutes < 30) {
+                        $fail('Duration must be at least 30 minutes.');
+                    }
+                },
+            ],
         ]);
     
-        // Create a new OT request
         $otRequest = new OTRequest();
-        $otRequest->user_id = Auth::id(); // Assuming you want to associate the request with the authenticated user
+        $otRequest->user_id = Auth::id();
         $otRequest->reason = $request->reason;
         $otRequest->time_duration = $request->time_duration;
-        $otRequest->status = 0; // Default status for new requests (for approval)
+        $otRequest->status = 0;
         $otRequest->save();
     
         return response()->json(['message' => 'OT request submitted successfully!'], 201);
     }
 
+    // public function handleOtReq(Request $req){
+    //     // return $req;
+    //     $user = Auth::user();
+    //     if($user){
+    //         $upd = OTRequest::find($req->ot_req_id);
+    //         $upd->status = $req->status;
+    //         $upd->approved_by = $user->username;
+    //         return $user->username;
+    //         $upd->save();
     
-    public function updateOtReq(Request $request){
-        return $request;
-        $otReqId = $request->ot_req_id;
-        $upd = OTRequest::find($otReqId);
-        if (!$upd) {
-            return response()->json(['error' => 'OT request not found'], 404);
+    //         return response()->json([
+    //             'message' => 'Leave request updated successfully.',
+    //             'approved_by' => $user->username,
+    //         ]);
+    //     }
+    
+    //     // If the user is not authenticated, return an error response
+    //     return response()->json(['error' => 'Unauthorized'], 401);
+    // }
+    public function handleOtReq(Request $req) {
+        $user = Auth::user();
+        if ($user) {
+            $upd = OTRequest::find($req->ot_req_id);
+            
+            if ($upd) { // Check if the request exists
+                $upd->status = $req->status;
+                $upd->approved_by = $user->username;
+                $upd->save(); // Save the changes
+    
+                return response()->json([
+                    'message' => 'Leave request updated successfully.',
+                    'approved_by' => $user->username,
+                ]);
+            } else {
+                return response()->json(['error' => 'Request not found.'], 404);
+            }
         }
-        $upd->status = $request->status;
-        $upd->save();
+    
+        // If the user is not authenticated, return an error response
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
     
     

@@ -3,7 +3,7 @@
         <v-snackbar
             :color="snackbarColor"
             location="top right"
-            :timeout="5000" 
+            :timeout="3500" 
             v-model="snackbar"
             >
             {{ snackbarMessage }}
@@ -38,25 +38,32 @@ const alertUpdate = () => {
 
 const alertApproved =  () => {
     snackbarColor.value = 'green-darken-2'
-    snackbarMessage.value = 'The leave request has been approved. 🤩'
+    snackbarMessage.value = 'The request has been approved. 🤩'
     snackbar.value = true
 }
 
 const alertDisapproved = () => {
     snackbarColor.value = 'deep-orange-darken-3'
-    snackbarMessage.value = 'The leave request has been disapproved. 😞'
+    snackbarMessage.value = 'The request has been disapproved. 😞'
     snackbar.value = true
 }
 
 const alertCancelled = () => {
     snackbarColor.value = 'orange-lighten-1'
-    snackbarMessage.value = 'The leave request has been cancelled. 😐'
+    snackbarMessage.value = 'The request has been cancelled. 😐'
+    snackbar.value = true
+}
+
+const alertCustom = (message) => {
+    snackbarColor.value = 'cyan-accent-1'
+    snackbarMessage.value = message
     snackbar.value = true
 }
 
 defineExpose({ 
     alertApproved,
     alertCancelled,
+    alertCustom,
     alertDisapproved,
     alertError,
     alertSuccess,

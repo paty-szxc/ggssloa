@@ -341,22 +341,31 @@ const formattedLeaveCredits = computed(() => {
 const remainingLeaveCredits = computed(() => {
     let cntSick = 0;
     let cntVacation = 0;
-    //use optional chaining to avoid errors if empData.value is undefined
+    // Use optional chaining to avoid errors if empData.value is undefined
     const leaveDetails = empData.value?.leave_details || [];
 
     if (leaveDetails.length > 0) {
         leaveDetails.forEach(el => {
             if (el.leave_type == 1) {
-                cntSick += el.no_of_days; //use += to accumulate
-            } else {
-                cntVacation += el.no_of_days; //use += to accumulate
+                if(el.status === 1){
+                    cntSick += el.no_of_days; //accumulate sick leave days
+                }
+            } 
+            else{
+                if(el.status === 1){
+                    cntVacation += el.no_of_days; //accumulate vacation leave days
+                }
             }
         });
     }
-    return `SL: ${isNegative(empData.value.sick_leave - cntSick) ? 0 : empData.value.sick_leave - cntSick} VL: ${isNegative(empData.value.vacation_leave - cntVacation) ? 0 : empData.value.vacation_leave - cntVacation}`;
+
+    const remainingSickLeave = empData.value.sick_leave - cntSick;
+    const remainingVacationLeave = empData.value.vacation_leave - cntVacation;
+
+    return `SL: ${isNegative(remainingSickLeave) ? 0 : remainingSickLeave} VL: ${isNegative(remainingVacationLeave) ? 0 : remainingVacationLeave}`;
 });
 
-function isNegative(value) {
+function isNegative(value){
     return value < 0;
 }
 
@@ -366,13 +375,18 @@ const leaveUsed = computed(() => {
     let cntVacation = 0
     
     const leaveDetails = empData.value?.leave_details || [];
-    if (leaveDetails.length > 0) {
+    if(leaveDetails.length > 0){
         leaveDetails.forEach(el => {
-            if(el.leave_type == 1){
-                cntSick += el.no_of_days;
-            }
-            else{
-                cntVacation += el.no_of_days
+            if (el.leave_type == 1) {
+                // Only subtract if the status is "Approved"
+                if (el.status === 1) {
+                    cntSick += el.no_of_days; // Accumulate sick leave days
+                }
+            } else {
+                // Check if the leave type is vacation leave
+                if (el.status === 1) {
+                    cntVacation += el.no_of_days; // Accumulate vacation leave days
+                }
             }
         });
     }
@@ -382,7 +396,7 @@ const leaveUsed = computed(() => {
 const withoutPay = computed(() => {
     let cntwithoutPay = 0;
     const leaveDetails = empData.value?.leave_details || [];
-    if (leaveDetails.length > 0) {
+    if(leaveDetails.length > 0){
         leaveDetails.forEach(el => {
             if(el.with_pay == 0){
                 cntwithoutPay ++
@@ -396,7 +410,7 @@ const numberOfDays = computed(() => {
     const fromDate = new Date(add.value.leave_from);
     const toDate = new Date(add.value.leave_to);
     
-    if (fromDate && toDate && fromDate <= toDate){
+    if(fromDate && toDate && fromDate <= toDate){
         const timeDiff = toDate - fromDate;
         const days = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
         add.value.no_of_days = days

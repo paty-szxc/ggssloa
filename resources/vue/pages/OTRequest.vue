@@ -19,7 +19,8 @@
 						placeholder="e.g., 0:30">
 					</v-text-field>
 					<v-btn 
-						@click="submitRequest" 
+						@click="submitRequest"
+						color="green-lighten-1"
 						:disabled="!valid">
 						Submit Request
 					</v-btn>
@@ -37,12 +38,15 @@
 				</v-data-table>
 			</v-card-text>
 		</v-card>
+
+		<Snackbar ref="snackbar"></Snackbar>
 	</v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import Snackbar from '../components/Snackbar.vue';
 
 const valid = ref(false);
 const reason = ref('');
@@ -50,41 +54,81 @@ const duration = ref('');
 const empData = ref({});
 const otReqData = ref([])
 
+const snackbar = ref(null)
 const headers = ref([
 	{ title: 'Reason', value: 'reason' },
 	{ title: 'Time', value: 'time_duration' },
 	{ title: 'Status', value: 'status' },
 ])
 
+// const rules = {
+// 	validDuration: (value) => {
+// 		const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
+// 		return regex.test(value) || 'Invalid duration format. Use HH:MM.';
+// 	},
+// };
 const rules = {
-	validDuration: (value) => {
-		const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
-		return regex.test(value) || 'Invalid duration format. Use HH:MM.';
-	},
+    validDuration: (value) => {
+        const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
+        return regex.test(value) || 'Invalid duration format. Use HH:MM.';
+    },
 };
 
+// const submitRequest = async () => {
+// 	const [hours, minutes] = duration.value.split(':').map(Number); //split and convert to numbers
+// 	const totalDuration = (hours * 60) + minutes; //calculate total duration in minutes
+
+// 	if(totalDuration < 30){
+// 		snackbar.value.alertCustom('Duration must be at least 30 minutes.')
+// 		return; //prevent submission if duration is less than 30 minutes
+// 	}
+// 	try{
+// 		const response = await axios.post('/submit_ot_request', {
+// 			reason: reason.value,
+// 			time_duration: duration.value, //send the duration in HH:MM format
+// 		});
+// 		snackbar.value.alertSuccess()
+// 		console.log(response.data.message);
+// 		reason.value = '';
+// 		duration.value = '';
+// 		fetchOTReq();
+// 	} 
+// 	catch(error){
+// 		snackbar.value.alertError()
+// 		console.error('Error submitting OT request:', error.response.data);
+// 	}
+// };
+
 const submitRequest = async () => {
-	const [hours, minutes] = duration.value.split(':').map(Number); // Split and convert to numbers
-	const totalDuration = (hours * 60) + minutes; // Calculate total duration in minutes
+    const [hours, minutes] = duration.value.split(':').map(Number); // Split and convert to numbers
+    const totalDuration = (hours * 60) + minutes; // Calculate total duration in minutes
 
-	if (totalDuration < 30) {
-		console.error('Duration must be at least 30 minutes.');
-		return; // Prevent submission if duration is less than 30 minutes
-	}
+    if (totalDuration < 30) {
+        snackbar.value.alertCustom('Duration must be at least 30 minutes.');
+        return; // Prevent submission if duration is less than 30 minutes
+    }
 
-	try {
-		const response = await axios.post('/submit_ot_request', {
-			reason: reason.value,
-			time_duration: duration.value, // Send the duration in HH:MM format
-		});
-		console.log(response.data.message); // Log success message
-		// Optionally, reset the form or fetch OT requests again
-		reason.value = '';
-		duration.value = '';
-		fetchOTReq(); // Refresh the OT requests
-	} catch (error) {
-		console.error('Error submitting OT request:', error.response.data);
-	}
+    // Validate the format before sending the request
+    const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
+    if (!regex.test(duration.value)) {
+        snackbar.value.alertCustom('Invalid duration format. Use HH:MM.');
+        return; // Prevent submission if format is invalid
+    }
+
+    try {
+        const response = await axios.post('/submit_ot_request', {
+            reason: reason.value,
+            time_duration: duration.value, // Send the duration in HH:MM format
+        });
+        snackbar.value.alertSuccess();
+        console.log(response.data.message);
+        reason.value = '';
+        duration.value = '';
+        fetchOTReq();
+    } catch (error) {
+        snackbar.value.alertError();
+        console.error('Error submitting OT request:', error.response.data);
+    }
 };
 
 

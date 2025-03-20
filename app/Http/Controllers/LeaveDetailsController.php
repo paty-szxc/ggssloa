@@ -57,6 +57,7 @@ class LeaveDetailsController extends Controller
             'leave_details.reasons',
             'leave_details.status',
             'leave_types.leave_name',
+            'leave_details.updated_by'
             )
             ->leftJoin('users', 'users.id', 'user_id')
             ->leftJoin('leave_types', 'leave_types.id', 'leave_type')
@@ -97,21 +98,15 @@ class LeaveDetailsController extends Controller
         // }
     }
 
-    // public function handleLeaveRequest(Request $req){
-    //     // return $req;
-    //     // $userId = Auth::id();
 
-    //     $upd = LeaveDetail::find($req->leave_detail_id);
-    //     $upd->status = $req->status;
-    //     $upd->save();
-    // }
-    public function handleLeaveRequest(Request $req){
+    public function handleLeaveReq(Request $req){
         // return $req;
         $user = Auth::user();
         if($user){
             $upd = LeaveDetail::find($req->leave_detail_id);
             $upd->status = $req->status;
             $upd->updated_by = $user->username;
+            // return $user->username;
             $upd->save();
     
             return response()->json([
