@@ -96,7 +96,7 @@
             </DataTable>
         </v-card>
 
-        <v-dialog v-model="addDialog" persistent no-click-animation>
+        <v-dialog v-model="addDialog" persistent no-click-animation width="500">
             <v-card>
                 <v-card-title 
                     style="background: linear-gradient(135deg, #0047AB, #50C878); 
@@ -244,6 +244,7 @@ const openAddDialog = () => {
 }
 
 const openEditDialog = (item) => {
+    loadData()
     console.log(item, 'home')
     add.value = item
     add.value.leave_from = new Date(item.leave_from)

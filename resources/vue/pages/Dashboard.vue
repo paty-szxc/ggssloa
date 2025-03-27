@@ -31,7 +31,7 @@ const leaveHeaders = ref([
 
 const fetchLeaveReq = async () => {
     try{
-        const res = await axios.get('/leave_req_details');
+        const res = await axios.get('leave_req_details');
         leaveDataReq.value = res.data;
         console.log(res.data);
     } 
@@ -51,7 +51,7 @@ const otHeaders = ref([
 
 const fetchApprovedOt = async () => {
     try{
-        const res = await axios.get('/ot_request_details')
+        const res = await axios.get('ot_request_details')
         otReqData.value = res.data
         console.log(res.data);
         

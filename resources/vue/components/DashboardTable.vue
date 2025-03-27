@@ -3,6 +3,8 @@
         <p class="text-h4">Leave Request Summary</p>
         <v-data-table
             density="compact"
+            fixed-footer
+            fixed-header
             :headers="leaveHeaders"
             :items="leaveDataReq">
             <template v-slot:item.status="{ item }">

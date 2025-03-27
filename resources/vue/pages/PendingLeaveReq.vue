@@ -37,7 +37,7 @@ const snackbar = ref(null);
 
 const fetchLeaveData = async () => {
     try {
-        const res = await axios.get('/leave_data');
+        const res = await axios.get('leave_data');
         leaveData.value = res.data;
         console.log(res.data);
     } catch (err) {

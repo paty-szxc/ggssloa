@@ -38,16 +38,21 @@
                 <span v-else-if="item.leave_type === 5">BEREAVEMENT</span>
             </template>
         </v-data-table>
-        <v-fab
-            absolute
-            @click="addBtn()"
-            color="info"
-            icon
-            right bottom
-            size="small">
-            <v-icon>mdi-plus</v-icon>
-        </v-fab>
-
+        <v-tooltip location="right">
+            <template v-slot:activator="{ props }">
+                <v-fab
+                    absolute
+                    @click="addBtn()"
+                    color="info"
+                    icon
+                    right bottom
+                    size="small"
+                    v-bind="props">
+                    <v-icon>mdi-plus</v-icon>
+                </v-fab>
+            </template>
+            <span>Add</span>
+        </v-tooltip>
         <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>

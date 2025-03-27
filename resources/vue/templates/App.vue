@@ -3,7 +3,7 @@
         <template v-if="!isLoginRoute">
             <v-app-bar style="color: white; background: linear-gradient(135deg, #0047AB, #50C878) ;">
                 <v-app-bar-nav-icon @click="navDrawer = !navDrawer"></v-app-bar-nav-icon>
-                <v-toolbar-title >Leave of Absence Form</v-toolbar-title>
+                <v-toolbar-title >Leave of Absence</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <p>Hi, {{ credential.username }}</p>
                 <v-switch

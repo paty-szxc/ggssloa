@@ -64,15 +64,19 @@
                     </v-tabs-window-item>
                 </v-tabs-window>
         </v-sheet>
+
+        <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
+import Snackbar from "../components/Snackbar.vue"
 
 const tab = ref(null)
 const credential = ref({})
+const snackbar = ref(null)
 
 //functions
 function registerEmp(){
@@ -84,7 +88,7 @@ function registerEmp(){
             axios.post('register', credential.value)
             .then(res => { // Corrected arrow function syntax
                 if (res.data.message) {
-                    alert(res.data.message)
+                    snackbar.value.alertCustom('Registration Successful! 🙂')
                     credential.value = {}
                 }
             })
@@ -105,12 +109,13 @@ function login(){
             axios.post('login', credential.value)
             .then(() => {
                 // notifications.notifySuccess(`Welcome ${credential.value.username}`, '3500')
+                // snackbar.value.alertCustom(`Welcome ${credential.value.username}`)
                 credential.value = {}
                 location.reload()
             })
             .catch(err => {
                 console.error('Error logging user:', err.response.data.message || err.message)
-                notifications.notifyError(err.response.data.message || 'Login failed');
+                // notifications.notifyError(err.response.data.message || 'Login failed');
             })
         })
     }
