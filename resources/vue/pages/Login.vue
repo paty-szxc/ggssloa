@@ -6,7 +6,7 @@
                     :width="300"
                     aspect-ratio="16/9"
                     cover
-                    src="/images/logo.png"
+                    src="images/logo.png"
                 ></v-img>
             </div>
             <v-tabs fixed-tabs v-model="tab">
@@ -80,16 +80,18 @@ function registerEmp(){
         notifications.notifyWarning('Fill up empty fields')
     } 
     else{
-        axios.post('api/register', credential.value)
-        .then(res => { // Corrected arrow function syntax
-            if (res.data.message) {
-                alert(res.data.message)
-                credential.value = {}
-            }
-        })
-        .catch(err => {
-            console.error('Error registering user:', err.response.data.message || err.message)
-            // Handle error response
+        axios.get('sanctum/csrf-cookie').then(() => {
+            axios.post('register', credential.value)
+            .then(res => { // Corrected arrow function syntax
+                if (res.data.message) {
+                    alert(res.data.message)
+                    credential.value = {}
+                }
+            })
+            .catch(err => {
+                console.error('Error registering user:', err.response.data.message || err.message)
+                // Handle error response
+            })
         })
     }
 }
@@ -99,15 +101,17 @@ function login(){
         notifications.notifyWarning('Fill up empty fields')
     }
     else{
-        axios.post('api/login', credential.value)
-        .then(() => {
-            // notifications.notifySuccess(`Welcome ${credential.value.username}`, '3500')
-            credential.value = {}
-            location.reload()
-        })
-        .catch(err => {
-            console.error('Error logging user:', err.response.data.message || err.message)
-            notifications.notifyError(err.response.data.message || 'Login failed');
+        axios.get('sanctum/csrf-cookie').then(() => {
+            axios.post('login', credential.value)
+            .then(() => {
+                // notifications.notifySuccess(`Welcome ${credential.value.username}`, '3500')
+                credential.value = {}
+                location.reload()
+            })
+            .catch(err => {
+                console.error('Error logging user:', err.response.data.message || err.message)
+                notifications.notifyError(err.response.data.message || 'Login failed');
+            })
         })
     }
 }

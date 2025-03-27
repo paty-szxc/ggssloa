@@ -54,10 +54,6 @@
                         v-model="formattedLeaveCredits"
                         readonly>
                     </v-text-field>
-                    <!-- <div>
-                        <label>Total Leave Credits</label>
-                        <div>{{ formattedLeaveCredits }}</div>
-                    </div> -->
                 </v-col>
                 <v-col :cols="cols">
                     <v-text-field
@@ -87,6 +83,9 @@
                     <v-chip :color="item.color" dark style="margin-right: 4px;">
                     {{ item.label }}
                     </v-chip>
+                </span>
+                <span style="margin-left: 50px; font-style: italic; color: red;">
+                    NOTE: DOUBLE CLICK THE ROW TO EDIT LEAVE DETAILS
                 </span>
             </div>
             <DataTable
@@ -137,7 +136,8 @@
                         v-model="numberOfDays">
                     </v-text-field>
                     <div style="display: flex; align-items: center;">
-                        <v-checkbox 
+                        <v-checkbox
+                            color="primary"
                             direction="horizontal" 
                             density="compact" 
                             hide-details="auto" 
@@ -145,6 +145,7 @@
                             label="Filed">
                         </v-checkbox>
                         <v-checkbox
+                            color="primary"
                             class="ml-5"
                             direction="horizontal" 
                             density="compact" 
@@ -153,7 +154,8 @@
                             label="With Pay">
                         </v-checkbox>
                     </div>
-                    <v-textarea 
+                    <v-textarea
+                        class="mt-2"
                         label="Reasons" 
                         variant="outlined"
                         v-model="add.reasons">
@@ -163,13 +165,13 @@
                     <v-spacer></v-spacer>
                     <v-btn 
                         @click="closeAddDialog"
-                        color="red darken-1" 
+                        color="red darken-1"
                         text>
                         Cancel
                     </v-btn>
                     <v-btn 
                         @click="submitForm"
-                        color="green darken-1" 
+                        color="green darken-1"
                         text>
                         Submit
                     </v-btn>
@@ -182,7 +184,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed} from 'vue';
 import DataTable from '../components/DataTable.vue';
 import Snackbar from '../components/Snackbar.vue';
 import { useDisplay } from 'vuetify';
@@ -203,7 +205,13 @@ const headers = ref([
     { title: 'Status', value: 'actions' }
 ]);
 
-const minDate = ref(new Date().toISOString().split('T')[0]);
+const minDate = computed(() => {
+    return isEditMode.value ? '' : new Date().toISOString().split('T')[0];
+});
+
+// const minFrom = computed(() => {
+//     return add.value.leave_from.toISOString().split('T')[0] ? add.value.leave_from.toISOString().split('T')[0] : '';
+// });
 
 const snackbar = ref(null);
 
@@ -229,6 +237,7 @@ const legendItems = ref([
 const addDialog = ref(false)
 const isEditMode = ref(false)
 
+
 const openAddDialog = () => {
     isEditMode.value = false
     addDialog.value = true
@@ -241,18 +250,42 @@ const openEditDialog = (item) => {
     add.value.leave_to = new Date(item.leave_to)
     isEditMode.value = true
     addDialog.value = true
+    add.value.with_pay = item.with_pay == 1 ? true : false
+    add.value.filed = item.filed == 1 ? true : false
 }
 
 const closeAddDialog = () => {
+    loadData()
     addDialog.value = false
     add.value = {}
 }
 
 //functions
 function submitForm(){
+
+    // Log the values to check their format
+    console.log('Leave From:', add.value.leave_from);
+    console.log('Leave To:', add.value.leave_to);
+
+    // Create Date objects and check for validity
+    const leaveFromDate = new Date(add.value.leave_from);
+    const leaveToDate = new Date(add.value.leave_to);
+    // Add one day to each date
+    leaveFromDate.setDate(leaveFromDate.getDate() + 1);
+    leaveToDate.setDate(leaveToDate.getDate() + 1);
+
+    // Update the add object with the modified dates
+    // add.value.leave_from = leaveFromDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+    // add.value.leave_to = leaveToDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+    add.value.leave_from = leaveFromDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+    add.value.leave_to = leaveToDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+
+
+    // console.log(add.value)
+
     const to_insert = add.value;
     
-    if(!add.value.leave_type){
+    if(!add.value.leave_type || !add.value.leave_to || !add.value.leave_from || !add.value.reasons){
         alert('Fill up empty fields!')
     }
     else{
@@ -260,7 +293,7 @@ function submitForm(){
         if(!isEditMode.value){
             // console.log('add')
             axios({
-                url: '/add_leave',
+                url: 'add_leave',
                 method: 'post',
                 data: {
                     to_insert
@@ -270,6 +303,7 @@ function submitForm(){
                 loadData()
                 snackbar.value.alertSuccess()
                 addDialog.value = false
+                add.value = {}
             }).catch(() => {
                 snackbar.value.alertError()
             });
@@ -277,7 +311,7 @@ function submitForm(){
             // console.log('edit')
             console.log(add.value)
             axios({
-                url: '/update_leave_home',
+                url: 'update_leave_home',
                 method: 'post',
                 data: {
                     to_insert
@@ -287,6 +321,7 @@ function submitForm(){
                 loadData()
                 snackbar.value.alertUpdate()
                 addDialog.value = false
+                add.value = {}
             }).catch(() => {
                 snackbarMessage.value = 'There was an error updating your leave request. Please try again.';
                 snackbar.value = true
@@ -297,7 +332,7 @@ function submitForm(){
 
 function loadData(){
     axios({
-        url:'/leave_data',
+        url:'leave_data',
         method: 'get'
     }).then((res) => {
         leaveData.value = res.data
@@ -308,7 +343,7 @@ function loadData(){
     });
 
     axios({
-        url: '/employee',
+        url: 'employee',
         method: 'get'
     }).then((res) => {
         empData.value = res.data; 
@@ -319,7 +354,7 @@ function loadData(){
     });
 
     axios({
-        url: '/leave_type',
+        url: 'leave_type',
         method: 'get'
     }).then((res) => {
         leaveTypeData.value = res.data; 
@@ -410,12 +445,21 @@ const numberOfDays = computed(() => {
     const fromDate = new Date(add.value.leave_from);
     const toDate = new Date(add.value.leave_to);
     
-    if(fromDate && toDate && fromDate <= toDate){
-        const timeDiff = toDate - fromDate;
-        const days = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-        add.value.no_of_days = days
-        return days;
-        // return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+    if (fromDate && toDate && fromDate <= toDate) {
+        let count = 0;
+        let currentDate = new Date(fromDate);
+
+        while (currentDate <= toDate) {
+            // Check if the current date is not a Sunday (0 = Sunday)
+            if (currentDate.getDay() !== 0) {
+                count++;
+            }
+            // Move to the next day
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        add.value.no_of_days = count;
+        return count;
     }
     return '';
 });

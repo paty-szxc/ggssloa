@@ -2,6 +2,7 @@
     <v-container>
         <p class="text-h4">Leave Approval List</p>
         <v-data-table
+            density="compact"
             :headers="headers" 
             :items="leaveData"> 
             <template v-slot:item.actions="{ item }">

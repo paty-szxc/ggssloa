@@ -92,14 +92,14 @@ const drawerItems = computed(() => {
 const credential = ref({ username: '', first_name: '', last_name: '' });
 
 function logout() {
-    axios.post('/logout').then(() => {
+    axios.post('logout').then(() => {
         location.reload()
     });
 }
 
 onMounted(() => {
     // Fetch user info when the component is mounted
-    axios.get('/api/user') // Adjust the URL based on your API structure
+    axios.get('api/user') // Adjust the URL based on your API structure
         .then(response => {
             // console.log(response.data, 'resdata')
             credential.value = response.data; // Set the user info

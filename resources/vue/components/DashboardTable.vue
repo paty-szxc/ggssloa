@@ -2,6 +2,7 @@
     <v-container>
         <p class="text-h4">Leave Request Summary</p>
         <v-data-table
+            density="compact"
             :headers="leaveHeaders"
             :items="leaveDataReq">
             <template v-slot:item.status="{ item }">
@@ -30,6 +31,7 @@
 
         <p class="text-h4">OT Request Summary</p>
         <v-data-table
+            density="compact"
             :headers="otHeaders"
             :items="otReqData">
             <template v-slot:item.status="{ item }">

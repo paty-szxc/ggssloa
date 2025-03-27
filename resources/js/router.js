@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory  } from 'vue-router'
 
 const router = createRouter({
-    history: createWebHistory (),
+    history: createWebHistory('/leave_of_absence/'),
+    base: '/leave_of_absence/',
     routes: [
         { 
             path: '/', 

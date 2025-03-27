@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmployeesController;
 use App\Http\Controllers\LeaveDetailsController;
 use App\Http\Controllers\OTRequestController;
@@ -25,8 +26,10 @@ use App\Models\LeaveType;
 
 
 Route::get('/login', [LoginController::class, 'create'])->name('login');
+Route::post('/login', [LoginController::class, 'store']);
+Route::post('/register', [RegisterController::class, 'create']);
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy']);
     Route::get('/user', [UsersInfoController::class, 'getUserInfo']);
     Route::get('/employee', [EmployeesController::class, 'getEmployee']);

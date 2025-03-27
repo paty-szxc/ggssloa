@@ -27,10 +27,11 @@
 				</v-form>
 
 				<v-data-table
+					density="compact"
 					:headers="headers"
 					:items="otReqData">
 					<template v-slot:item.status="{ item }">
-						<span v-if="item.status === 0" style="color: green;">For Approval</span>
+						<span v-if="item.status === 0" style="color: blue;">For Approval</span>
 						<span v-else-if="item.status === 1" style="color: green;">Approved</span>
 						<span v-else-if="item.status === 2" style="color: red;">Disapproved</span>
 						<span v-else-if="item.status === 3" style="color: orange;">Cancelled</span>
@@ -116,7 +117,7 @@ const submitRequest = async () => {
     }
 
     try {
-        const response = await axios.post('/submit_ot_request', {
+        const response = await axios.post('submit_ot_request', {
             reason: reason.value,
             time_duration: duration.value, // Send the duration in HH:MM format
         });
@@ -135,7 +136,7 @@ const submitRequest = async () => {
 // Function to load employee data
 const loadEmployeeData = async () => {
 	try{
-		const res = await axios.get('/employee'); 
+		const res = await axios.get('employee'); 
 		empData.value = res.data;
 	} 
 	catch(error){
@@ -145,7 +146,7 @@ const loadEmployeeData = async () => {
 
 const fetchOTReq = async () => {
 	try{
-		const res = await axios.get('/get_ot_request')
+		const res = await axios.get('get_ot_request')
 		otReqData.value = res.data
 		console.log(res.data)
 	}

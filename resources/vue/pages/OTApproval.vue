@@ -4,6 +4,7 @@
             <v-card-title><p class="text-h4">Overtime Approval List</p></v-card-title>
             <v-card-text>
                 <v-data-table
+                    density="compact"
                     :headers="headers"
                     :items="allotReqData">
                     <template v-slot:item.actions="{ item }">
@@ -51,7 +52,7 @@ const allotReqData = ref([])
 
 const fetchOTReq = async () => {
 	try{
-		const res = await axios.get('/get_all_ot_request')
+		const res = await axios.get('get_all_ot_request')
 		allotReqData.value = res.data
 		console.log(res.data)
 	}
@@ -73,7 +74,7 @@ const approve = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'approve', status)
         axios({
-            url: '/handle_ot_request',
+            url: 'handle_ot_request',
             method: 'post',
             data: {
                 ot_req_id : id,
@@ -103,7 +104,7 @@ const disapprove = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'disapprove', status)
         axios({
-            url: '/handle_ot_request',
+            url: 'handle_ot_request',
             method: 'post',
             data: {
                 ot_req_id : id,
@@ -133,7 +134,7 @@ const cancel = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'cancel', status)
         axios({
-            url: '/handle_ot_request',
+            url: 'handle_ot_request',
             method: 'post',
             data: {
                 ot_req_id : id,

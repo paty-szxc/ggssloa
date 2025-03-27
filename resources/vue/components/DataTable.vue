@@ -1,6 +1,7 @@
 <template>
     <v-container>
         <v-data-table
+            density="compact"
             fixed-footer
             fixed-header
             :headers="props.headers"
@@ -46,11 +47,14 @@
             size="small">
             <v-icon>mdi-plus</v-icon>
         </v-fab>
+
+        <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, ref } from 'vue';
+import Snackbar from './Snackbar.vue';
 
 const props = defineProps({
     headers: {
@@ -64,12 +68,23 @@ const props = defineProps({
     }
 });
 
+const snackbar = ref(null)
 const emit = defineEmits();
 const addBtn = () => {
     emit('open-dialog');
 };
-const editData = (item) => {
-    emit('edit-data', item.item);
-};
+// const editData = (item) => {
+//     emit('edit-data', item.item);
+// };
 
+const editData = (item) => {
+    const status = item.item.status;
+    if(status === 0){
+        emit('edit-data', item.item);
+    } 
+    else{
+        console.log("Edit not allowed for this status:", status);
+        snackbar.value.alertCustom("Already approved request can't be edited.")
+    }
+};
 </script>

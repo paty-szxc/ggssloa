@@ -58,7 +58,7 @@ const approve = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'approve', status)
         axios({
-            url: '/handle_leave_request',
+            url: 'handle_leave_request',
             method: 'post',
             data: {
                 leave_detail_id : id,
@@ -88,7 +88,7 @@ const disapprove = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'disapprove', status)
         axios({
-            url: '/handle_leave_request',
+            url: 'handle_leave_request',
             method: 'post',
             data: {
                 leave_detail_id : id,
@@ -117,7 +117,7 @@ const cancel = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'cancel', status)
         axios({
-            url: '/handle_leave_request',
+            url: 'handle_leave_request',
             method: 'post',
             data: {
                 leave_detail_id : id,

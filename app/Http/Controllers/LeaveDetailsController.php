@@ -66,9 +66,9 @@ class LeaveDetailsController extends Controller
         return $leave_req;
     }
 
-    public function convertToYyyyMmDd($isoDate) {
-        return (new \DateTime($isoDate))->format('Y-m-d');
-    }
+    // public function convertToYyyyMmDd($isoDate) {
+    //     return (new \DateTime($isoDate))->format('Y-m-d');
+    // }
 
     public function addLeave(Request $req){
         // return $req;
@@ -78,8 +78,10 @@ class LeaveDetailsController extends Controller
             'user_id' => $userId,
             'date_filed' => (new \DateTime())->format('Y-m-d'),
             'leave_type' => $req->to_insert['leave_type'],
-            'leave_from' => $this->convertToYyyyMmDd($req->to_insert['leave_from']),
-            'leave_to' => $this->convertToYyyyMmDd($req->to_insert['leave_to']),
+            // 'leave_from' => $this->convertToYyyyMmDd($req->to_insert['leave_from']),
+            // 'leave_to' => $this->convertToYyyyMmDd($req->to_insert['leave_to']),
+            'leave_from' => $req->to_insert['leave_from'],
+            'leave_to' => $req->to_insert['leave_to'],
             'no_of_days' => $req->to_insert['no_of_days'],
             'reasons' => $req->to_insert['reasons'],
             'filed' => isset($req->to_insert['filed']) ? $req->to_insert['filed'] : 0,
@@ -129,8 +131,10 @@ class LeaveDetailsController extends Controller
             'user_id' => $userId,
             'date_filed' => (new \DateTime())->format('Y-m-d'),
             'leave_type' => $request->to_insert['leave_type'],
-            'leave_from' => $this->convertToYyyyMmDd($request->to_insert['leave_from']),
-            'leave_to' => $this->convertToYyyyMmDd($request->to_insert['leave_to']),
+            // 'leave_from' => $this->convertToYyyyMmDd($request->to_insert['leave_from']),
+            // 'leave_to' => $this->convertToYyyyMmDd($request->to_insert['leave_to']),
+            'leave_from' => $request->to_insert['leave_from'],
+            'leave_to' => $request->to_insert['leave_to'],
             'no_of_days' => $request->to_insert['no_of_days'],
             'reasons' => $request->to_insert['reasons'],
             'filed' => isset($request->to_insert['filed']) ? $request->to_insert['filed'] : 0,
