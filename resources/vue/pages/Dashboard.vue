@@ -34,9 +34,11 @@ const fetchLeaveReq = async () => {
         const res = await axios.get('leave_req_details');
         leaveDataReq.value = res.data;
         console.log(res.data);
-    } 
+    }
     catch(error){
         console.error('Error fetching leave data:', error);
+        console.log('error');
+        
     }
 };
 
