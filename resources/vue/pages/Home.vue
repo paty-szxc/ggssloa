@@ -312,7 +312,7 @@ function submitForm(){
             // console.log('edit')
             console.log(add.value)
             axios({
-                url: 'update_leave_home',
+                url: 'update_leave',
                 method: 'post',
                 data: {
                     to_insert

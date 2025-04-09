@@ -121,7 +121,7 @@ class LeaveDetailsController extends Controller
         return response()->json(['error' => 'Unauthorized'], 401);
     }
 
-    public function update_leave_home(Request $request){
+    public function updateLeave(Request $request){
         // return $request;
         $userId = Auth::id();
 

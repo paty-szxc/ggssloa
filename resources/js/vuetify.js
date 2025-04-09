@@ -25,8 +25,8 @@ const vuetify = createVuetify({
             dark: {
                 // Define your dark theme colors here
             },
-            },
         },
+    },
 })
 
 export default vuetify;

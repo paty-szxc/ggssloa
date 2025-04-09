@@ -137,6 +137,4 @@ class OTRequestController extends Controller
         // If the user is not authenticated, return an error response
         return response()->json(['error' => 'Unauthorized'], 401);
     }
-    
-    
 }

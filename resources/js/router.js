@@ -29,6 +29,16 @@ const router = createRouter({
             name: 'Leave Status Dashboard', 
             component: () => import('../vue/pages/Dashboard.vue') 
         },
+        {
+            path: '/official_business_form',
+            name: 'Official Business Form',
+            component: () => import('../vue/pages/OBForm.vue')
+        },
+        {
+            path: '/pending_ob_req',
+            name: 'Pending OB Request',
+            component: () => import('../vue/pages/OBFormReq.vue')
+        },
         { 
             path: '/login', 
             name: 'Login', 

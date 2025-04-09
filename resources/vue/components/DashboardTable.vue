@@ -8,6 +8,7 @@
             v-model="tab">
             <v-tab>Leave Request Summary</v-tab>
             <v-tab>OT Request Summary</v-tab>
+            <v-tab>OB Request Summary</v-tab>
         </v-tabs>
         <v-tabs-window v-model="tab">
             <v-tabs-window-item value="leave_dets">
@@ -45,6 +46,18 @@
                     </template>
                 </v-data-table>
             </v-tabs-window-item>
+            <v-tabs-window-item value="ob_req">
+                <v-data-table
+                    density="compact"
+                    :headers="obHeaders"
+                    :items="obReqData">
+                    <template v-slot:item.status="{ item }">
+                        <span v-if="item.status === 1" style="color: green;">Approved</span>
+                        <span v-else-if="item.status === 2" style="color: red;">Disapproved</span>
+                        <span v-else-if="item.status === 3" style="color: orange;">Cancelled</span>
+                    </template>
+                </v-data-table>
+            </v-tabs-window-item>
         </v-tabs-window>
     </v-container>
 </template>
@@ -52,11 +65,13 @@
 <script setup>
 import { defineProps, ref } from 'vue';
 
-const { leaveHeaders, leaveDataReq, otHeaders, otReqData } = defineProps({
+const { leaveHeaders, leaveDataReq, otHeaders, otReqData, obHeaders, obReqData } = defineProps({
     leaveHeaders: Array,
     leaveDataReq: Array,
     otHeaders: Array,
-    otReqData: Array
+    otReqData: Array,
+    obHeaders: Array,
+    obReqData: Array
 });
 
 

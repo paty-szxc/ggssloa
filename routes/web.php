@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmployeesController;
 use App\Http\Controllers\LeaveDetailsController;
+use App\Http\Controllers\OBController;
 use App\Http\Controllers\OTRequestController;
 use App\Http\Controllers\SpaController;
 use App\Http\Controllers\UsersInfoController;
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/employee', [EmployeesController::class, 'getEmployee']);
     Route::get('/leave_data', [LeaveDetailsController::class, 'getLeaveDetails']);
     Route::get('/leave_req_details', [LeaveDetailsController::class, 'getLeaveReq']);
+    Route::get('/get_ob_data', [OBController::class, 'getOB']);
     
     Route::get('/leave_type', function(){
         return LeaveType::all();
@@ -46,7 +48,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/handle_ot_request', [OTRequestController::class, 'handleOtReq']);
     Route::get('/ot_request_details', [OTRequestController::class, 'getApprovedOtReq']);
     Route::post('/add_leave', [LeaveDetailsController::class, 'addLeave']);
-    Route::post('/update_leave_home', [LeaveDetailsController::class, 'update_leave_home']);
+    Route::post('/update_leave', [LeaveDetailsController::class, 'updateLeave']);
     Route::post('/handle_leave_request', [LeaveDetailsController::class, 'handleLeaveReq']);
+    Route::get('/get_all_ob', [OBController::class, 'getAllObReq']);
+    Route::post('/add_ob', [OBController::class, 'addOBForm']);
+    Route::post('/update_ob', [OBController::class, 'updateOb']);
+    Route::post('/handle_ob_request', [OBController::class, 'handleObReq']);
+    Route::get('/ob_request_details', [OBController::class, 'getApprovedOb']);
     Route::get('/{any}', [SpaController::class, 'index'])->where('any','.*');
 });

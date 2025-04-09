@@ -3,8 +3,10 @@
         <DashboardTable
             :leaveHeaders="leaveHeaders"
             :leaveDataReq="leaveDataReq"
+            :otHeaders="otHeaders"
             :otReqData="otReqData"
-            :otHeaders="otHeaders">
+            :obHeaders="obHeaders"
+            :obReqData="obReqData">
         </DashboardTable>
     </v-container>
 </template>
@@ -33,11 +35,11 @@ const fetchLeaveReq = async () => {
     try{
         const res = await axios.get('leave_req_details');
         leaveDataReq.value = res.data;
-        console.log(res.data);
+        console.log(res.data)
     }
     catch(error){
-        console.error('Error fetching leave data:', error);
-        console.log('error');
+        console.error('Error fetching leave data:', error)
+        console.log('error')
         
     }
 };
@@ -55,11 +57,33 @@ const fetchApprovedOt = async () => {
     try{
         const res = await axios.get('ot_request_details')
         otReqData.value = res.data
-        console.log(res.data);
-        
+        console.log(res.data)
     } 
     catch(error){
-        console.error('Error fetching OT data');
+        console.error('Error fetching OT data.', error)
+    }
+}
+
+const obReqData = ref([])
+const obHeaders = ref([
+    { title: 'Name', value: 'name'},
+	{ title: 'Date', value: 'date' },
+	{ title: 'Destination', value: 'destination' },
+	{ title: 'Purpose', value: 'purpose' },
+	{ title: 'Departure', value: 'time_departure' },
+	{ title: 'Return', value: 'time_return' },
+	{ title: 'Status', value: 'status' },
+	{ title: 'Approved By', value: 'approved_by' },
+])
+
+const fetchApprovedOb= async () => {
+    try{
+        const res = await axios.get('ob_request_details')
+        obReqData.value = res.data
+        console.log(res.data)
+    }
+    catch(error){
+        console.error('Error fetching OB data.', error)
     }
 }
 
@@ -68,5 +92,6 @@ const fetchApprovedOt = async () => {
 onMounted(async () => {
     await fetchLeaveReq()
     await fetchApprovedOt()
+    await fetchApprovedOb()
 });
 </script>

@@ -67,7 +67,9 @@ const drawers = ref([
     { id: 2, title: 'Pending Leave Requests', path: '/pending_leave_req' },
     { id: 3, title: 'Overtime Request', path: '/ot_request' },
     { id: 4, title: 'Pending Overtime Request', path: '/ot_approval' },
-    { id: 5, title: 'Status Dashboard', path: '/status_dashboard' },
+    { id: 5, title: 'Official Business Form', path: '/official_business_form' },
+    { id: 6, title: 'Pending OB Request', path: '/pending_ob_req' },
+    { id: 7, title: 'Status Dashboard', path: '/status_dashboard' },
 ]);
 
 
@@ -80,7 +82,7 @@ const drawerItems = computed(() => {
         if (credential.value.id == 2 || credential.value.id == 12) {
             items.push(el);
         } else {
-            if (el.title === 'Home' || el.title === 'Overtime Request') {
+            if (el.title === 'Home' || el.title === 'Overtime Request' || el.title === 'Official Business Form') {
                 items.push(el);
             }
         }

@@ -1,12 +1,12 @@
 <template>
     <v-container>
         <v-card>
-            <v-card-title><p class="text-h4">Overtime Approval List</p></v-card-title>
+            <v-card-title><p class="text-h4">Official Business Request List</p></v-card-title>
             <v-card-text>
                 <v-data-table
                     density="compact"
                     :headers="headers"
-                    :items="allotReqData">
+                    :items="allObReqData">
                     <template v-slot:item.actions="{ item }">
                         <v-tooltip location="bottom">
                             <template v-slot:activator="{ props }">
@@ -30,7 +30,7 @@
                 </v-data-table>
             </v-card-text>
         </v-card>
-
+        
         <Snackbar ref="snackbar"></Snackbar>
     </v-container>
 </template>
@@ -44,16 +44,19 @@ import Snackbar from '../components/Snackbar.vue';
 const snackbar = ref(null);
 const headers = ref([
     { title: 'Name', value: 'name'},
-	{ title: 'Reason', value: 'reason' },
-	{ title: 'Time', value: 'time_duration' },
-	{ title: 'Actions', value: 'actions' },
+	{ title: 'Date', value: 'date' },
+	{ title: 'Destination', value: 'destination' },
+	{ title: 'Purpose', value: 'purpose' },
+	{ title: 'Departure', value: 'time_departure' },
+	{ title: 'Return', value: 'time_return' },
+    { title: 'Actions', value: 'actions' },
 ])
-const allotReqData = ref([])
+const allObReqData = ref([])
 
-const fetchOTReq = async () => {
+const fetchObReq = async () => {
 	try{
-		const res = await axios.get('get_all_ot_request')
-		allotReqData.value = res.data
+		const res = await axios.get('get_all_ob')
+		allObReqData.value = res.data
 		console.log(res.data)
 	}
 	catch(error){
@@ -63,7 +66,7 @@ const fetchOTReq = async () => {
 
 const approve = async (id, status) => {
     const result = await Swal.fire({
-        text: "Are you sure you want to approve this OT request?",
+        text: "Are you sure you want to approve this OB request?",
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Yes',
@@ -74,15 +77,15 @@ const approve = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'approve', status)
         axios({
-            url: 'handle_ot_request',
+            url: 'handle_ob_request',
             method: 'post',
             data: {
-                ot_req_id : id,
+                ob_req_id : id,
                 status : status,
             }
         }).then((res) => {
             console.log(res)
-            fetchOTReq()
+            fetchObReq()
             snackbar.value.alertApproved()
         }).catch((error) =>  {
             console.error(error)
@@ -93,7 +96,7 @@ const approve = async (id, status) => {
 
 const disapprove = async (id, status) => {
     const result = await Swal.fire({
-        text: "Are you sure you want to disapprove this OT request?",
+        text: "Are you sure you want to disapprove this OB request?",
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Yes',
@@ -104,15 +107,15 @@ const disapprove = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'disapprove', status)
         axios({
-            url: 'handle_ot_request',
+            url: 'handle_ob_request',
             method: 'post',
             data: {
-                ot_req_id : id,
+                ob_req_id : id,
                 status : status,
             }
         }).then((res) => {
             console.log(res)
-            fetchOTReq()
+            fetchObReq()
             snackbar.value.alertDisapproved()
         }).catch((error) =>  {
             console.error(error)
@@ -123,7 +126,7 @@ const disapprove = async (id, status) => {
 
 const cancel = async (id, status) => {
     const result = await Swal.fire({
-        text: "Are you sure you want to cancel this OT request?",
+        text: "Are you sure you want to cancel this OB request?",
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Yes',
@@ -134,15 +137,15 @@ const cancel = async (id, status) => {
     if(result.isConfirmed){
         console.log(id, 'cancel', status)
         axios({
-            url: 'handle_ot_request',
+            url: 'handle_ob_request',
             method: 'post',
             data: {
-                ot_req_id : id,
+                ob_req_id : id,
                 status : status,
             }
         }).then((res) => {
             console.log(res)
-            fetchOTReq()
+            fetchObReq()
             snackbar.value.alerCancelled()
         }).catch((error) =>  {
             console.error(error)
@@ -152,6 +155,6 @@ const cancel = async (id, status) => {
 }
 
 onMounted(async () => {
-    fetchOTReq()
+    fetchObReq()
 })
 </script>
