@@ -48,7 +48,8 @@ const otReqData = ref([])
 const otHeaders = ref([
     { title: 'Name', value: 'name', sortable: true },
     { title: 'Reason', value: 'reason' },
-	{ title: 'Time', value: 'time_duration' },
+	{ title: 'Start', value: 'time_duration' },
+	{ title: 'End', value: 'time_end' },
 	{ title: 'Status', value: 'status' },
 	{ title: 'Approved By', value: 'approved_by' },
 ])

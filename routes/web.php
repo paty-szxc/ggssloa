@@ -41,6 +41,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/leave_type', function(){
         return LeaveType::all();
     });
+
+    // Route::get('/test-time-validation', function () {
+    //     $testTimes = ['5:00 PM', '7:30 PM', '12:00 AM', '12:00 PM', '1:00 AM', '1:00 PM', '0:00', '13:00'];
+
+    //     $results = [];
+    //     foreach ($testTimes as $time) {
+    //         if (preg_match('/^(0?[1-9]|1[0-2]):([0-5]\d)( ?[AP]M)?$/i', $time, $matches)) {
+    //             $results[] = "$time is valid.";
+    //         } else {
+    //             $results[] = "$time is invalid.";
+    //         }
+    //     }
+
+    //     return response()->json($results);
+    // });
+
     
     Route::get('/get_ot_request', [OTRequestController::class, 'getOTReq']);
     Route::get('/get_all_ot_request', [OTRequestController::class, 'getAllOtReq']);

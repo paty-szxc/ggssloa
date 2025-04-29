@@ -4,11 +4,13 @@ import '@mdi/font/css/materialdesignicons.css'
 
 import { VTextField } from 'vuetify/components/VTextField'
 import { VDateInput } from 'vuetify/labs/VDateInput'
+import { VTimePicker } from 'vuetify/labs/VTimePicker'
 
 const vuetify = createVuetify({
     components: {
         VTextField,
-        VDateInput
+        VDateInput,
+        VTimePicker,
     },
 
     defaults: {

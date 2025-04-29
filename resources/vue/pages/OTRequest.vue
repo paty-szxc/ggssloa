@@ -13,10 +13,57 @@
 						v-model="reason"
 						label="Reason for OT">
 					</v-text-field>
+					<!-- <v-text-field
+						v-model="start"
+						label="Start (HH:MM)"
+						placeholder="e.g., 5:00">
+					</v-text-field>
 					<v-text-field
-						v-model="duration"
-						label="Duration (HH:MM)"
-						placeholder="e.g., 0:30">
+						v-model="end"
+						label="End (HH:MM)"
+						placeholder="e.g., 6:30">
+					</v-text-field> -->
+					<v-text-field
+						v-model="time_duration"
+						:active="menuStart"
+						:focus="menuStart"
+						label="Time Start"
+						prepend-inner-icon="mdi-clock-time-four-outline"
+						readonly
+					>
+						<v-menu
+							v-model="menuStart"
+							:close-on-content-click="false"
+							activator="parent"
+							transition="scale-transition">
+							<v-time-picker
+								format="24hr"
+								v-if="menuStart"
+								v-model="time_duration"
+								full-width>
+							</v-time-picker>
+						</v-menu>
+					</v-text-field>
+					<v-text-field
+						v-model="time_end"
+						:active="menuEnd"
+						:focus="menuEnd"
+						label="Time End"
+						prepend-inner-icon="mdi-clock-time-four-outline"
+						readonly
+					>
+						<v-menu
+							v-model="menuEnd"
+							:close-on-content-click="false"
+							activator="parent"
+							transition="scale-transition">
+							<v-time-picker
+								format="24hr"
+								v-if="menuEnd"
+								v-model="time_end"
+								full-width>
+							</v-time-picker>
+						</v-menu>
 					</v-text-field>
 					<v-btn 
 						@click="submitRequest"
@@ -51,29 +98,22 @@ import Snackbar from '../components/Snackbar.vue';
 
 const valid = ref(false);
 const reason = ref('');
-const duration = ref('');
+const time_duration = ref('');
+const time_end = ref('');
 const empData = ref({});
 const otReqData = ref([])
+
+const menuStart = ref(false)
+const menuEnd = ref(false)
 
 const snackbar = ref(null)
 const headers = ref([
 	{ title: 'Reason', value: 'reason' },
-	{ title: 'Time', value: 'time_duration' },
+	{ title: 'Time Start', value: 'time_duration' },
+	{ title: 'Time End', value: 'time_end' },
+	{ title: 'Total Hours/Minutes', value: 'total_hrs_mins' },
 	{ title: 'Status', value: 'status' },
 ])
-
-// const rules = {
-// 	validDuration: (value) => {
-// 		const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
-// 		return regex.test(value) || 'Invalid duration format. Use HH:MM.';
-// 	},
-// };
-const rules = {
-    validDuration: (value) => {
-        const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
-        return regex.test(value) || 'Invalid duration format. Use HH:MM.';
-    },
-};
 
 // const submitRequest = async () => {
 // 	const [hours, minutes] = duration.value.split(':').map(Number); //split and convert to numbers
@@ -101,48 +141,47 @@ const rules = {
 // };
 
 const submitRequest = async () => {
-    const [hours, minutes] = duration.value.split(':').map(Number); // Split and convert to numbers
-    const totalDuration = (hours * 60) + minutes; // Calculate total duration in minutes
+    const startTime = time_duration.value
+    const endTime = time_end.value
 
-    if (totalDuration < 30) {
-        snackbar.value.alertCustom('Duration must be at least 30 minutes.');
-        return; // Prevent submission if duration is less than 30 minutes
-    }
+	console.log(startTime, '&', endTime)
 
-    // Validate the format before sending the request
-    const regex = /^(0|[1-9]\d*):[0-5]\d$/; // Regex to match HH:MM format
-    if (!regex.test(duration.value)) {
-        snackbar.value.alertCustom('Invalid duration format. Use HH:MM.');
-        return; // Prevent submission if format is invalid
+    // const regex = /^(0?[1-9]|1[0-2]):[0-5]\d\s?(AM|PM)?$/i;
+	const regex = /^(0?[0-9]|1[0-9]|2[0-3]):[0-5]\d$/
+    if (!regex.test(startTime) || !regex.test(endTime)) {
+        snackbar.value.alertCustom('Invalid duration format. Use HH:MM.')
+        return
     }
 
     try {
         const response = await axios.post('submit_ot_request', {
             reason: reason.value,
-            time_duration: duration.value, // Send the duration in HH:MM format
-        });
-        snackbar.value.alertSuccess();
-        console.log(response.data.message);
-        reason.value = '';
-        duration.value = '';
-        fetchOTReq();
+            time_duration: startTime,
+            time_end: endTime,
+			// total_hrs_mins: total_hrs_mins
+        })
+        snackbar.value.alertSuccess()
+        console.log(response.data.message)
+        reason.value = ''
+        time_duration.value = ''
+        time_end.value = ''
+        fetchOTReq()
     } catch (error) {
-        snackbar.value.alertError();
-        console.error('Error submitting OT request:', error.response.data);
+        snackbar.value.alertError()
+        console.error('Error submitting OT request:', error.response.data)
     }
-};
+}
 
 
-// Function to load employee data
 const loadEmployeeData = async () => {
 	try{
-		const res = await axios.get('employee'); 
-		empData.value = res.data;
+		const res = await axios.get('employee') 
+		empData.value = res.data
 	} 
 	catch(error){
-		console.error('Error fetching employee data:', error);
+		console.error('Error fetching employee data:', error)
 	}
-};
+}
 
 const fetchOTReq = async () => {
 	try{

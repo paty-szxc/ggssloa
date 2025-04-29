@@ -45,7 +45,8 @@ const snackbar = ref(null);
 const headers = ref([
     { title: 'Name', value: 'name'},
 	{ title: 'Reason', value: 'reason' },
-	{ title: 'Time', value: 'time_duration' },
+	{ title: 'Time Start', value: 'time_duration' },
+	{ title: 'Time End', value: 'time_end' },
 	{ title: 'Actions', value: 'actions' },
 ])
 const allotReqData = ref([])

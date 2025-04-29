@@ -16,6 +16,8 @@ class OTRequest extends Model
         'user_id',
         'reason',
         'time_duration',
+        'time_end',
+        'total_hrs_mins',
         'status',
     ];
 }
