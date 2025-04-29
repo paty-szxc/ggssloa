@@ -32,7 +32,7 @@ const alertError = () => {
 
 const alertUpdate = () => {
     snackbarColor.value = 'green-darken-2'
-    snackbarMessage.value = 'Leave request updated successfully. 😊'
+    snackbarMessage.value = 'Your request has been updated successfully. 😊'
     snackbar.value = true
 }
 

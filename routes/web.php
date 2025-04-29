@@ -61,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get_ot_request', [OTRequestController::class, 'getOTReq']);
     Route::get('/get_all_ot_request', [OTRequestController::class, 'getAllOtReq']);
     Route::post('/submit_ot_request', [OTRequestController::class, 'submitOtReq']);
+    Route::post('/update_ot_request', [OTRequestController::class, 'updateOtReq']);
     Route::post('/handle_ot_request', [OTRequestController::class, 'handleOtReq']);
     Route::get('/ot_request_details', [OTRequestController::class, 'getApprovedOtReq']);
     Route::post('/add_leave', [LeaveDetailsController::class, 'addLeave']);

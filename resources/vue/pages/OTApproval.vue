@@ -47,6 +47,7 @@ const headers = ref([
 	{ title: 'Reason', value: 'reason' },
 	{ title: 'Time Start', value: 'time_duration' },
 	{ title: 'Time End', value: 'time_end' },
+    { title: 'Total Hours/Minutes', value: 'total_hrs_mins' },
 	{ title: 'Actions', value: 'actions' },
 ])
 const allotReqData = ref([])

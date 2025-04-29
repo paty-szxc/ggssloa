@@ -50,6 +50,7 @@ const otHeaders = ref([
     { title: 'Reason', value: 'reason' },
 	{ title: 'Start', value: 'time_duration' },
 	{ title: 'End', value: 'time_end' },
+    { title: 'Total Hours/Minutes', value: 'total_hrs_mins' },
 	{ title: 'Status', value: 'status' },
 	{ title: 'Approved By', value: 'approved_by' },
 ])

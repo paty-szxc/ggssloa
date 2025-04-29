@@ -13,10 +13,12 @@ class OTRequestController extends Controller
         $userId = Auth::id();
 
         $ot = OTRequest::select(
+            'id',
             'user_id',
             'reason',
             'time_duration',
             'time_end',
+            'total_hrs_mins',
             'status'
             )
             ->where('user_id', $userId)
@@ -37,6 +39,7 @@ class OTRequestController extends Controller
             'ot_request.reason',
             'ot_request.time_duration',
             'ot_request.time_end',
+            'ot_request.total_hrs_mins',
             'ot_request.status'
             )
             ->leftJoin('users', 'users.id', 'user_id')
@@ -58,6 +61,7 @@ class OTRequestController extends Controller
             'ot_request.reason',
             'ot_request.time_duration',
             'ot_request.time_end',
+            'ot_request.total_hrs_mins',
             'ot_request.status',
             'ot_request.approved_by'
             )
@@ -71,22 +75,6 @@ class OTRequestController extends Controller
             });
         return $approved_ot;
     }
-
-    // public function submitOtReq(Request $request){
-    //     $request->validate([
-    //         'reason' => 'required|string|max:255',
-    //         'time_duration' => 'required|string|regex:/^(0|[1-9]\d*):[0-5]\d$/', //enforce HH:MM format
-
-    //     ]);
-    //     $otRequest = new OTRequest();
-    //     $otRequest->user_id = Auth::id();
-    //     $otRequest->reason = $request->reason;
-    //     $otRequest->time_duration = $request->time_duration;
-    //     $otRequest->status = 0;
-    //     $otRequest->save();
-    
-    //     return response()->json(['message' => 'OT request submitted successfully!'], 201);
-    // }
 
     public function submitOtReq(Request $req){
         // return $req;
@@ -110,38 +98,100 @@ class OTRequestController extends Controller
                 'regex:/^(0?[0-9]|1[0-9]|2[0-3]):[0-5]\d$/'
             ]
         ]);
+
+           // Calculate total hours based on time_duration and time_end
+        list($durationHours, $durationMinutes) = explode(':', $req->time_duration);
+        list($endHours, $endMinutes) = explode(':', $req->time_end);
+
+        // Convert both to total minutes
+        $totalDurationMinutes = ($durationHours * 60) + $durationMinutes;
+        $totalEndMinutes = ($endHours * 60) + $endMinutes;
+
+        // Calculate the total time worked
+        $totalMinutes = $totalEndMinutes - $totalDurationMinutes;
+
+        // Ensure totalMinutes is not negative
+        if ($totalMinutes < 0) {
+            return response()->json(['message' => 'End time must be after the start time.'], 400);
+        }
+
+        // Convert total minutes back to hours and minutes
+        $totalHours = floor($totalMinutes / 60);
+        $remainingMinutes = $totalMinutes % 60;
+
+        // Format the total time as "X hour(s) and Y minute(s)"
+        $totalTimeFormatted = '';
+        if ($totalHours > 0) {
+            $totalTimeFormatted .= $totalHours . ' hour' . ($totalHours > 1 ? 's' : '');
+        }
+        if ($remainingMinutes > 0) {
+            if ($totalTimeFormatted) {
+                $totalTimeFormatted .= ' and ';
+            }
+            $totalTimeFormatted .= $remainingMinutes . ' minute' . ($remainingMinutes > 1 ? 's' : '');
+        }
     
         $otRequest = new OTRequest();
         $otRequest->user_id = Auth::id();
         $otRequest->reason = $req->reason;
         $otRequest->time_duration = $req->time_duration;
         $otRequest->time_end = $req->time_end;
+        $otRequest->total_hrs_mins = $totalTimeFormatted;
         $otRequest->status = 0;
         $otRequest->save();
     
-        return response()->json(['message' => 'OT request submitted successfully!'], 201);
+        return response()->json(['message' => 'OT request submitted successfully!', 'total_hrs_mins' => $totalTimeFormatted], 201);
     }
 
-    // public function handleOtReq(Request $req){
-    //     // return $req;
-    //     $user = Auth::user();
-    //     if($user){
-    //         $upd = OTRequest::find($req->ot_req_id);
-    //         $upd->status = $req->status;
-    //         $upd->approved_by = $user->username;
-    //         return $user->username;
-    //         $upd->save();
-    
-    //         return response()->json([
-    //             'message' => 'Leave request updated successfully.',
-    //             'approved_by' => $user->username,
-    //         ]);
-    //     }
-    
-    //     // If the user is not authenticated, return an error response
-    //     return response()->json(['error' => 'Unauthorized'], 401);
-    // }
-    public function handleOtReq(Request $req) {
+    public function updateOtReq(Request $req){
+        // return $req;
+        $userId = Auth::id();
+        $otRequest = OTRequest::find($req->to_update['id']);
+        // Calculate total hours based on time_duration and time_end
+        list($durationHours, $durationMinutes) = explode(':', $req->to_update['time_duration']);
+        list($endHours, $endMinutes) = explode(':', $req->to_update['time_end']);
+        // Convert both to total minutes
+        $totalDurationMinutes = ($durationHours * 60) + $durationMinutes;
+        $totalEndMinutes = ($endHours * 60) + $endMinutes;
+
+        // Calculate the total time worked
+        $totalMinutes = $totalEndMinutes - $totalDurationMinutes;
+
+        // Ensure totalMinutes is not negative
+        if ($totalMinutes < 0) {
+            return response()->json(['message' => 'End time must be after the start time.'], 400);
+        }
+        
+        // Convert total minutes back to hours and minutes
+        $totalHours = floor($totalMinutes / 60);
+        $remainingMinutes = $totalMinutes % 60;
+        
+        // Format the total time as "X hour(s) and Y minute(s)"
+        $totalTimeFormatted = '';
+        if ($totalHours > 0) {
+            $totalTimeFormatted .= $totalHours . ' hour' . ($totalHours > 1 ? 's' : '');
+        }
+        if ($remainingMinutes > 0) {
+            if ($totalTimeFormatted) {
+                $totalTimeFormatted .= ' and ';
+            }
+            $totalTimeFormatted .= $remainingMinutes . ' minute' . ($remainingMinutes > 1 ? 's' : '');
+        }
+
+        $otRequest->update([
+            'user_id' => $userId,
+            'reason' => $req->to_update['reason'],
+            'time_duration' => $req->to_update['time_duration'],
+            'time_end' => $req->to_update['time_end'],
+            'total_hrs_mins' => $totalTimeFormatted
+        ]);
+        return response()->json(['message' => 'OT request updated successfully!', 'total_hrs_mins' => $totalTimeFormatted], 200);
+
+
+        return response()->json(['error' => 'Request not found or unauthorized.'], 404);
+    }
+
+    public function handleOtReq(Request $req){
         $user = Auth::user();
         if ($user) {
             $upd = OTRequest::find($req->ot_req_id);

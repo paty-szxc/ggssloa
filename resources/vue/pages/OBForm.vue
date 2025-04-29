@@ -177,7 +177,7 @@ function updateLeave(){
         purpose: editData.value.purpose,
         time_departure: editData.value.time_departure,
         time_return: editData.value.time_return
-    };
+    }
 	axios({
 		url: 'update_ob',
 		method: 'post',

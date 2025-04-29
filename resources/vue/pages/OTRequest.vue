@@ -13,16 +13,14 @@
 						v-model="reason"
 						label="Reason for OT">
 					</v-text-field>
-					<!-- <v-text-field
-						v-model="start"
-						label="Start (HH:MM)"
-						placeholder="e.g., 5:00">
-					</v-text-field>
-					<v-text-field
-						v-model="end"
-						label="End (HH:MM)"
-						placeholder="e.g., 6:30">
-					</v-text-field> -->
+					<!-- <v-date-input
+                        density="compact"
+                        label="Date"
+                        prepend-icon=""
+                        prepend-inner-icon="mdi-calendar"
+                        variant="outlined"
+						v-model="date"
+                    /> -->
 					<v-text-field
 						v-model="time_duration"
 						:active="menuStart"
@@ -73,10 +71,24 @@
 					</v-btn>
 				</v-form>
 
+				<div class="pa-5 text-h6">
+                LEGENDS: 
+					<span v-for="(item, index) in legendItems" :key="index">
+						<v-chip :color="item.color" dark style="margin-right: 4px;">
+						{{ item.label }}
+						</v-chip>
+					</span>
+					<span style="margin-left: 50px; font-style: italic; color: red;">
+						NOTE: DOUBLE CLICK THE ROW TO EDIT DETAILS
+					</span>
+				</div>
+
+
 				<v-data-table
 					density="compact"
 					:headers="headers"
-					:items="otReqData">
+					:items="otReqData"
+					@dblclick:row="(item, event) => openEditDialog(event, item)">
 					<template v-slot:item.status="{ item }">
 						<span v-if="item.status === 0" style="color: blue;">For Approval</span>
 						<span v-else-if="item.status === 1" style="color: green;">Approved</span>
@@ -87,6 +99,86 @@
 			</v-card-text>
 		</v-card>
 
+		<v-dialog v-model="updateDialog" persistent no-click-animation width="500">
+			<v-card>
+				<v-card-title
+					color="white"
+					style="background: linear-gradient(135deg, #0047ab, #50c878);">
+					Edit
+				</v-card-title>
+				<v-card-text>
+					<v-form ref="editForm" v-model="editValid">
+						<v-text-field
+							class="mt-3"
+							hide-details
+							label="Reason"
+							v-model="editData.reason">
+						</v-text-field>
+						<v-text-field
+							class="mt-3"
+							hide-details
+							v-model="editData.time_duration"
+							:active="editMenuStart"
+							:focus="editMenuStart"
+							label="Time Start"
+							prepend-inner-icon="mdi-clock-time-four-outline"
+							readonly>
+							<v-menu
+								v-model="editMenuStart"
+								:close-on-content-click="true"
+								activator="parent"
+								transition="scale-transition">
+								<v-time-picker
+									format="24hr"
+									v-if="editMenuStart"
+									v-model="editData.time_duration"
+									full-width>
+								</v-time-picker>
+							</v-menu>
+						</v-text-field>
+						<v-text-field
+							class="mt-3"
+							hide-details
+							v-model="editData.time_end"
+							:active="editMenuEnd"
+							:focus="editMenuEnd"
+							label="Time End"
+							prepend-inner-icon="mdi-clock-time-four-outline"
+							readonly
+						>
+							<v-menu
+								v-model="editMenuEnd"
+								:close-on-content-click="false"
+								activator="parent"
+								transition="scale-transition">
+								<v-time-picker
+									format="24hr"
+									v-if="editMenuEnd"
+									v-model="editData.time_end"
+									full-width>
+								</v-time-picker>
+							</v-menu>
+						</v-text-field>
+						<v-card-actions>
+							<v-spacer></v-spacer>
+							<v-btn 
+								@click="closeEditDialog"
+								color="red darken-1"
+								text>
+								Cancel
+							</v-btn>
+							<v-btn
+								@click="updateOtReq"
+								color="green darken-1"
+								text>
+								Submit
+							</v-btn>
+						</v-card-actions>
+					</v-form>
+				</v-card-text>
+			</v-card>
+		</v-dialog>
+
 		<Snackbar ref="snackbar"></Snackbar>
 	</v-container>
 </template>
@@ -96,24 +188,36 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Snackbar from '../components/Snackbar.vue';
 
-const valid = ref(false);
-const reason = ref('');
-const time_duration = ref('');
-const time_end = ref('');
-const empData = ref({});
+const valid = ref(false)
+const reason = ref('')
+const time_duration = ref('')
+const time_end = ref('')
+const empData = ref({})
 const otReqData = ref([])
-
 const menuStart = ref(false)
 const menuEnd = ref(false)
+const updateDialog = ref(false)
+const editData = ref({})
+const editValid = ref(false)
+const editMenuStart = ref(false)
+const editMenuEnd = ref(false)
 
 const snackbar = ref(null)
 const headers = ref([
+	// { title: 'Date', value: 'date' },
 	{ title: 'Reason', value: 'reason' },
 	{ title: 'Time Start', value: 'time_duration' },
 	{ title: 'Time End', value: 'time_end' },
 	{ title: 'Total Hours/Minutes', value: 'total_hrs_mins' },
 	{ title: 'Status', value: 'status' },
 ])
+
+const legendItems = ref([
+    { label: 'For Approval', color: 'blue' },
+    { label: 'Approved', color: 'green' },
+    { label: 'Disapproved/AWOL', color: 'red' },
+    { label: 'Cancelled', color: 'orange' },
+]);
 
 // const submitRequest = async () => {
 // 	const [hours, minutes] = duration.value.split(':').map(Number); //split and convert to numbers
@@ -139,6 +243,62 @@ const headers = ref([
 // 		console.error('Error submitting OT request:', error.response.data);
 // 	}
 // };
+
+function updateOtReq(){
+	const to_update = {
+		id: editData.value.id,
+        reason: editData.value.reason,
+        time_duration: editData.value.time_duration,
+        time_end: editData.value.time_end
+    }
+	axios({
+		url: 'update_ot_request',
+		method: 'post',
+		data: {
+			to_update
+		}
+	}).then((res) => {
+		console.log(res)
+		fetchOTReq()
+		snackbar.value.alertUpdate()
+		updateDialog.value = false
+		editData.value = {}
+	}).catch(() => {
+		snackbarMessage.value = 'There was an error updating your request. Please try again.'
+		snackbar.value = true
+	})
+}
+
+const openEditDialog = (event) => {
+    const item = event.item;
+    console.log('Selected item:', item);
+    
+    // Convert time from 12-hour format to 24-hour format
+    const convertTo24HourFormat = (time) => {
+        const [timePart, modifier] = time.split(' ');
+        let [hours, minutes] = timePart.split(':');
+        if (modifier === 'PM' && hours !== '12') {
+            hours = parseInt(hours, 10) + 12;
+        }
+        if (modifier === 'AM' && hours === '12') {
+            hours = '00';
+        }
+        return `${hours}:${minutes}`;
+    };
+
+    editData.value = {
+		id: item.id,
+        reason: item.reason || '',
+        time_duration: convertTo24HourFormat(item.time_duration) || '00:00', // Convert to 24-hour format
+        time_end: convertTo24HourFormat(item.time_end) || '00:00' // Convert to 24-hour format
+    };
+    
+    updateDialog.value = true;
+}
+
+const closeEditDialog = () => {
+	updateDialog.value = false
+}
 
 const submitRequest = async () => {
     const startTime = time_duration.value
