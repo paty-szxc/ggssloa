@@ -15,6 +15,7 @@ class OTRequestController extends Controller
         $ot = OTRequest::select(
             'id',
             'user_id',
+            'date',
             'reason',
             'time_duration',
             'time_end',
@@ -36,6 +37,7 @@ class OTRequestController extends Controller
             'users.name',
             'users.username',
             'ot_request.id',
+            'ot_request.date',
             'ot_request.reason',
             'ot_request.time_duration',
             'ot_request.time_end',
@@ -58,6 +60,7 @@ class OTRequestController extends Controller
             'users.name',
             'users.username',
             'ot_request.id',
+            'ot_request.date',
             'ot_request.reason',
             'ot_request.time_duration',
             'ot_request.time_end',
@@ -79,6 +82,7 @@ class OTRequestController extends Controller
     public function submitOtReq(Request $req){
         // return $req;
         $req->validate([
+            'date' => 'required|date',
             'reason' => 'required|string|max:255',
             'time_duration' => [
                 'required',
@@ -133,6 +137,7 @@ class OTRequestController extends Controller
     
         $otRequest = new OTRequest();
         $otRequest->user_id = Auth::id();
+        $otRequest->date = date('Y-m-d H:i:s', strtotime($req->date));
         $otRequest->reason = $req->reason;
         $otRequest->time_duration = $req->time_duration;
         $otRequest->time_end = $req->time_end;
@@ -180,6 +185,7 @@ class OTRequestController extends Controller
 
         $otRequest->update([
             'user_id' => $userId,
+            'date' => $req->to_update['date'],
             'reason' => $req->to_update['reason'],
             'time_duration' => $req->to_update['time_duration'],
             'time_end' => $req->to_update['time_end'],

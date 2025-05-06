@@ -9,20 +9,20 @@
 						v-model="empData.emp_name"
 						readonly>
 					</v-text-field>
-					<v-text-field
-						v-model="reason"
-						label="Reason for OT">
-					</v-text-field>
-					<!-- <v-date-input
+					<v-date-input
                         density="compact"
                         label="Date"
                         prepend-icon=""
                         prepend-inner-icon="mdi-calendar"
                         variant="outlined"
-						v-model="date"
-                    /> -->
+						v-model="add.date"
+                    />					
 					<v-text-field
-						v-model="time_duration"
+						v-model="add.reason"
+						label="Reason for OT">
+					</v-text-field>
+					<v-text-field
+						v-model="add.time_duration"
 						:active="menuStart"
 						:focus="menuStart"
 						label="Time Start"
@@ -37,13 +37,13 @@
 							<v-time-picker
 								format="24hr"
 								v-if="menuStart"
-								v-model="time_duration"
+								v-model="add.time_duration"
 								full-width>
 							</v-time-picker>
 						</v-menu>
 					</v-text-field>
 					<v-text-field
-						v-model="time_end"
+						v-model="add.time_end"
 						:active="menuEnd"
 						:focus="menuEnd"
 						label="Time End"
@@ -58,7 +58,7 @@
 							<v-time-picker
 								format="24hr"
 								v-if="menuEnd"
-								v-model="time_end"
+								v-model="add.time_end"
 								full-width>
 							</v-time-picker>
 						</v-menu>
@@ -108,6 +108,38 @@
 				</v-card-title>
 				<v-card-text>
 					<v-form ref="editForm" v-model="editValid">
+						<!-- <v-date-input
+							density="compact"
+							hide-details
+							label="Date"
+							prepend-icon=""
+							prepend-inner-icon="mdi-calendar"
+							variant="outlined"
+							v-model="editData.date"
+						/> -->
+						<v-text-field
+							class="mt-3"
+							hide-details
+							v-model="editData.date"
+							:active="dateMenu"
+							:focus="dateMenu"
+							label="Date"
+							prepend-inner-icon="mdi-calendar"
+							readonly
+						>
+							<v-menu
+								v-model="dateMenu"
+								:close-on-content-click="true"
+								activator="parent"
+								transition="scale-transition"
+							>
+								<v-date-picker
+									v-if="dateMenu"
+									v-model="editData.date"
+									full-width
+								></v-date-picker>
+							</v-menu>
+						</v-text-field>
 						<v-text-field
 							class="mt-3"
 							hide-details
@@ -189,11 +221,10 @@ import axios from 'axios';
 import Snackbar from '../components/Snackbar.vue';
 
 const valid = ref(false)
-const reason = ref('')
-const time_duration = ref('')
-const time_end = ref('')
+const add = ref({})
 const empData = ref({})
 const otReqData = ref([])
+const dateMenu = ref(false)
 const menuStart = ref(false)
 const menuEnd = ref(false)
 const updateDialog = ref(false)
@@ -204,7 +235,7 @@ const editMenuEnd = ref(false)
 
 const snackbar = ref(null)
 const headers = ref([
-	// { title: 'Date', value: 'date' },
+	{ title: 'Date', value: 'date' },
 	{ title: 'Reason', value: 'reason' },
 	{ title: 'Time Start', value: 'time_duration' },
 	{ title: 'Time End', value: 'time_end' },
@@ -245,8 +276,33 @@ const legendItems = ref([
 // };
 
 function updateOtReq(){
+	let formattedDate;
+    try {
+        // Check if editData.value.date is already a string in YYYY-MM-DD format
+        if (typeof editData.value.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(editData.value.date)) {
+            formattedDate = editData.value.date;
+        } else {
+            // Handle Date object or other formats
+            const dateObj = new Date(editData.value.date);
+            if (isNaN(dateObj.getTime())) {
+                throw new Error('Invalid date');
+            }
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            formattedDate = `${year}-${month}-${day}`;
+        }
+    } catch (error) {
+        console.error('Date formatting error:', error);
+        snackbarMessage.value = 'Invalid date format. Please select a valid date.';
+        snackbar.value = true;
+        return;
+    }
+
+
 	const to_update = {
 		id: editData.value.id,
+		date: formattedDate,
         reason: editData.value.reason,
         time_duration: editData.value.time_duration,
         time_end: editData.value.time_end
@@ -286,8 +342,11 @@ const openEditDialog = (event) => {
         return `${hours}:${minutes}`;
     };
 
+	const dateObj = item.date ? new Date(item.date) : null;
+
     editData.value = {
 		id: item.id,
+		date: dateObj,
         reason: item.reason || '',
         time_duration: convertTo24HourFormat(item.time_duration) || '00:00', // Convert to 24-hour format
         time_end: convertTo24HourFormat(item.time_end) || '00:00' // Convert to 24-hour format
@@ -301,30 +360,29 @@ const closeEditDialog = () => {
 }
 
 const submitRequest = async () => {
-    const startTime = time_duration.value
-    const endTime = time_end.value
+    const startTime = add.value.time_duration
+    const endTime = add.value.time_end
 
 	console.log(startTime, '&', endTime)
 
     // const regex = /^(0?[1-9]|1[0-2]):[0-5]\d\s?(AM|PM)?$/i;
 	const regex = /^(0?[0-9]|1[0-9]|2[0-3]):[0-5]\d$/
-    if (!regex.test(startTime) || !regex.test(endTime)) {
+    if(!regex.test(startTime) || !regex.test(endTime)){
         snackbar.value.alertCustom('Invalid duration format. Use HH:MM.')
         return
     }
 
     try {
         const response = await axios.post('submit_ot_request', {
-            reason: reason.value,
+			date: new Date(add.value.date),
+            reason: add.value.reason,
             time_duration: startTime,
             time_end: endTime,
 			// total_hrs_mins: total_hrs_mins
         })
         snackbar.value.alertSuccess()
         console.log(response.data.message)
-        reason.value = ''
-        time_duration.value = ''
-        time_end.value = ''
+        add.value = {}
         fetchOTReq()
     } catch (error) {
         snackbar.value.alertError()

@@ -19,5 +19,6 @@ class OTRequest extends Model
         'time_end',
         'total_hrs_mins',
         'status',
+        'date',
     ];
 }
