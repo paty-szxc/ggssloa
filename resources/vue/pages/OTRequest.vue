@@ -378,7 +378,7 @@ const submitRequest = async () => {
             reason: add.value.reason,
             time_duration: startTime,
             time_end: endTime,
-			// total_hrs_mins: total_hrs_mins
+			// total_hrs_mins: total_hrs_minsJ
         })
         snackbar.value.alertSuccess()
         console.log(response.data.message)

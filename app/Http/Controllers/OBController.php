@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\OBForm;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class OBController extends Controller
@@ -22,7 +23,12 @@ class OBController extends Controller
             'status'
             )
             ->where('user_id', $userId)
-            ->get();
+            ->get()
+            ->map(function ($item){
+                $item->time_departure = Carbon::parse($item->time_departure)->format('h:i A');
+                $item->time_return = Carbon::parse($item->time_return)->format('h:i A');
+                return $item;
+            });
         return $ob;
     }
 
@@ -40,7 +46,12 @@ class OBController extends Controller
             )
             ->leftJoin('users', 'users.id', 'user_id')
             ->where('status', 0)
-            ->get();
+            ->get()
+            ->map(function ($item){
+                $item->time_departure = Carbon::parse($item->time_departure)->format('h:i A');
+                $item->time_return = Carbon::parse($item->time_return)->format('h:i A');
+                return $item;
+            });
         return $all_ob;
     }
 
@@ -54,12 +65,12 @@ class OBController extends Controller
             'time_departure' => [
                 'required',
                 'string',
-                'regex:/^(0|[1-9]\d*):[0-5]\d$/',
+                'regex:/^(0?[0-9]|1[0-9]|2[0-3]):[0-5]\d$/',
             ],
             'time_return' => [
                 'nullable',
                 'string',
-                'regex:/^(0|[1-9]\d*):[0-5]\d$/',
+                'regex:/^(0?[0-9]|1[0-9]|2[0-3]):[0-5]\d$/',
             ]
         ]);
     
@@ -135,7 +146,12 @@ class OBController extends Controller
             )
             ->leftJoin('users', 'users.id', 'user_id')
             ->where('status', '!=', 0)
-            ->get();
+            ->get()
+            ->map(function ($item){
+                $item->time_departure = Carbon::parse($item->time_departure)->format('h:i A');
+                $item->time_return = Carbon::parse($item->time_return)->format('h:i A');
+                return $item;
+            });
         return $approved_ob;
     }
 }

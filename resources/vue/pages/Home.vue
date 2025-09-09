@@ -116,7 +116,6 @@
                     <v-date-input
                         density="compact"
                         label="Leave From:"
-                        :min="minDate"
                         prepend-icon=""
                         prepend-inner-icon="mdi-calendar"
                         variant="outlined"
@@ -125,7 +124,6 @@
                     <v-date-input
                         density="compact"
                         label="Leave To:"
-                        :min="minDate"
                         prepend-icon=""
                         prepend-inner-icon="mdi-calendar"
                         variant="outlined"

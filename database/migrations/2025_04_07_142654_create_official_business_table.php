@@ -14,17 +14,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('official_business', function (Blueprint $table) {
-            $table->id(); // Auto-incrementing ID
+            $table->id(); 
             $table->unsignedBigInteger('user_id');
-            $table->string('emp_name'); // Employee name
-            $table->date('date'); // Date of travel
-            $table->string('destination'); // Travel destination
-            $table->string('purpose'); // Purpose of travel
-            $table->time('time_departure'); // Departure time
-            $table->time('time_return')->nullable(); // Return time
+            $table->string('emp_name'); 
+            $table->date('date'); 
+            $table->string('destination');
+            $table->string('purpose'); 
+            $table->time('time_departure'); 
+            $table->time('time_return')->nullable(); 
             $table->integer('status')->default(0);
             $table->string('approved_by')->nullable();
-            $table->timestamps(); // Created at and updated at timestamps
+            $table->timestamps(); 
             $table->softDeletes();
         });
     }
