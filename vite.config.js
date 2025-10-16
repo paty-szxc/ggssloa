@@ -14,6 +14,11 @@ export default defineConfig({
         }),
     ],
 
+    server: {
+        host: '127.0.0.1', // or '192.168.100.236' if you want to use the IP
+        port: 8000,
+    },
+
     build: {
         outDir: 'public/build',
         rollupOptions: {

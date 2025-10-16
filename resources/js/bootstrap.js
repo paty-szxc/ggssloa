@@ -10,10 +10,14 @@ window._ = _;
 import axios from 'axios';
 window.axios = axios;
 
-axios.defaults.withXSRFToken = true;
+// Set the base URL and credentials
+axios.defaults.baseURL = 'http://127.0.0.1:8000';
+// axios.defaults.baseURL = 'http://192.168.100.236/leave_of_absence';
 axios.defaults.withCredentials = true;
+axios.defaults.withXSRFToken = true;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common['Accept'] = 'application/json';
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening

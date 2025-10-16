@@ -20,13 +20,19 @@ class LoginController extends Controller
     public function store(Request $request)
     {
         try {
-            if(! Auth::attempt($request->toArray(), true)) {
+            if(! Auth::attempt($request->only('username', 'password'), $request->filled('remember'))) {
                 return response()->json([
                     'message' => 'User do not match in our records.'
-                ]);
+                ], 401);
             }
+            
             $request->session()->regenerate();
-            return redirect()->intended('/');
+            
+            return response()->json([
+                'message' => 'Login successful',
+                'redirect' => url('/') // or specific route
+            ]);
+            
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

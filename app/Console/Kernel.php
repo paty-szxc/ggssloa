@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Run daily to check who crosses 6-month mark and grant initial leaves
+        $schedule->command('leaves:grant-initial')->dailyAt('01:00');
     }
 
     /**

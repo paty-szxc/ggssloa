@@ -6,7 +6,7 @@
                     :width="300"
                     aspect-ratio="16/9"
                     cover
-                    src="images/logo.png"
+                    src="/images/logo.png"
                 ></v-img>
             </div>
             <v-tabs fixed-tabs v-model="tab">
@@ -39,16 +39,43 @@
                     <v-tabs-window-item value="register">
                         <v-text-field
                             class="mt-3"
+                            density="compact"
+                            label="Employee Code"
+                            placeholder="0000-0000"
+                            style="width: 350px;"
+                            v-model="credential.emp_code">
+                        </v-text-field>
+                        <v-date-input
+                            clearable
+                            density="compact"
+                            label="Date Hired"
+                            prepend-icon=""
+                            prepend-inner-icon="mdi-calendar"
+                            style="width: 350px;"
+                            variant="outlined"
+                            v-model="credential.date_hired"
+                            :max="new Date().toISOString().split('T')[0]"
+                        />
+                        <v-text-field
+                            density="compact"
+                            label="Position"
+                            style="width: 350px;"
+                            v-model="credential.position">
+                        </v-text-field>
+                        <v-text-field
+                            density="compact"
                             label="Name"
                             style="width: 350px;"
                             v-model="credential.name">
                         </v-text-field>
                         <v-text-field
+                            density="compact"
                             label="Username"
                             style="width: 350px;"
                             v-model="credential.username">
                         </v-text-field>
                         <v-text-field
+                            density="compact"
                             label="Password"
                             style="width: 350px;"
                             type="password"
@@ -79,22 +106,91 @@ const credential = ref({})
 const snackbar = ref(null)
 
 //functions
+// function registerEmp(){
+//     if(!credential.value.name || !credential.value.username || !credential.value.password){
+//         notifications.notifyWarning('Fill up empty fields')
+//     } 
+//     else{
+//         axios.get('sanctum/csrf-cookie').then(() => {
+//             axios.post('register', credential.value)
+//             .then(res => { // Corrected arrow function syntax
+//                 if (res.data.message) {
+//                     snackbar.value.alertCustom('Registration Successful! 🙂')
+//                     credential.value = {}
+//                 }
+//             })
+//             .catch(err => {
+//                 console.error('Error registering user:', err.response.data.message || err.message)
+//                 // Handle error response
+//             })
+//         })
+//     }
+// }
+
+// function login(){
+//     if(!credential.value.username || !credential.value.password){
+//         notifications.notifyWarning('Fill up empty fields')
+//     }
+//     else{
+//         axios.get('sanctum/csrf-cookie').then(() => {
+//             axios.post('/login', credential.value)
+//             .then(() => {
+//                 // notifications.notifySuccess(`Welcome ${credential.value.username}`, '3500')
+//                 // snackbar.value.alertCustom(`Welcome ${credential.value.username}`)
+//                 credential.value = {}
+//                 location.reload()
+//             })
+//             .catch(err => {
+//                 console.error('Error logging user:', err.response.data.message || err.message)
+//                 // notifications.notifyError(err.response.data.message || 'Login failed');
+//             })
+//         })
+//     }
+// }
+
+//onmounted
+// onMounted(async () => {
+//     loadData()
+// });
+
 function registerEmp(){
+    // helper: format to YYYY-MM-DD in local time
+    const formatDateLocal = (value) => {
+        if (!value) return null
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+        const d = new Date(value)
+        if (isNaN(d.getTime())) return null
+        const y = d.getFullYear()
+        const m = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${y}-${m}-${day}`
+    }
+
     if(!credential.value.name || !credential.value.username || !credential.value.password){
         notifications.notifyWarning('Fill up empty fields')
     } 
     else{
-        axios.get('sanctum/csrf-cookie').then(() => {
-            axios.post('register', credential.value)
-            .then(res => { // Corrected arrow function syntax
+        // map frontend keys to backend and normalize date
+        const payload = {
+            employee_code: credential.value.emp_code || undefined,
+            date_hired: formatDateLocal(credential.value.date_hired),
+            position: credential.value.position,
+            name: credential.value.name,
+            username: credential.value.username,
+            password: credential.value.password
+        }
+
+        // Use window.axios which has the correct configuration
+        window.axios.get('sanctum/csrf-cookie').then(() => {
+            window.axios.post('register', payload)
+            .then(res => {
                 if (res.data.message) {
                     snackbar.value.alertCustom('Registration Successful! 🙂')
                     credential.value = {}
                 }
             })
             .catch(err => {
-                console.error('Error registering user:', err.response.data.message || err.message)
-                // Handle error response
+                console.error('Error registering user:', err.response?.data?.message || err.message)
             })
         })
     }
@@ -106,27 +202,25 @@ function login(){
     }
     else{
         axios.get('sanctum/csrf-cookie').then(() => {
-            axios.post('login', credential.value)
-            .then(() => {
-                // notifications.notifySuccess(`Welcome ${credential.value.username}`, '3500')
-                // snackbar.value.alertCustom(`Welcome ${credential.value.username}`)
-                credential.value = {}
-                location.reload()
+            axios.post('/login', credential.value)
+            .then((response) => {
+                if (response.data.redirect) {
+                    // If server returns redirect URL
+                    window.location.href = response.data.redirect;
+                } else {
+                    // Fallback: redirect to home
+                    window.location.href = '/';
+                }
             })
             .catch(err => {
-                console.error('Error logging user:', err.response.data.message || err.message)
-                // notifications.notifyError(err.response.data.message || 'Login failed');
+                console.error('Error logging user:', err.response?.data?.message || err.message)
+                snackbar.value.alertCustom(err.response?.data?.message || 'Login failed', 'error')
             })
+        }).catch(csrfError => {
+            console.error('CSRF token error:', csrfError)
         })
     }
 }
-
-//onmounted
-onMounted(async () => {
-    loadData()
-});
-
-
 </script>
 
 <style scoped>
