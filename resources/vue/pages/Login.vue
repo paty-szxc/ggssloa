@@ -170,7 +170,7 @@ function registerEmp(){
         notifications.notifyWarning('Fill up empty fields')
     } 
     else{
-        // map frontend keys to backend and normalize date
+        //map frontend keys to backend and normalize date
         const payload = {
             employee_code: credential.value.emp_code || undefined,
             date_hired: formatDateLocal(credential.value.date_hired),
@@ -180,7 +180,7 @@ function registerEmp(){
             password: credential.value.password
         }
 
-        // Use window.axios which has the correct configuration
+        //use window.axios which has the correct configuration
         window.axios.get('sanctum/csrf-cookie').then(() => {
             window.axios.post('register', payload)
             .then(res => {
